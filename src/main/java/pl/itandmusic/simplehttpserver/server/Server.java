@@ -1,11 +1,11 @@
 package pl.itandmusic.simplehttpserver.server;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
+import pl.itandmusic.simplehttpserver.request.RequestThread;
 
 public class Server {
 
@@ -15,20 +15,16 @@ public class Server {
 		
 		System.out.println("Server started.");
 		
-		Socket socket = serverSocket.accept();
+		while(!serverSocket.isClosed()) {
+			Socket socket = serverSocket.accept();	
+			new Thread(new RequestThread(socket)).start();
+		}
 		
 		serverSocket.close();
 		
-		PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
+		System.out.println("Server stopped.");
 		
-		printWriter.println("HTTP/1.1 OK 200");
-		printWriter.println("Content-Type: text/html");
-		printWriter.println("\r\n");
-		printWriter.print("<p> Hello World </p>");
 		
-		printWriter.close();
-		
-		socket.close();
 		
 	}
 }
