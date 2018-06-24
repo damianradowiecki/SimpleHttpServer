@@ -31,7 +31,9 @@ public class RequestThread implements Runnable {
 			printWriter.println("HTTP/1.1 OK 200");
 			printWriter.println("Content-Type: text/html");
 			printWriter.println("\r\n");
-			printWriter.print("<p> " + request.getMethod() + " || " + request.getRequestURI() + " || " + request.getProtocol() + " </p>");
+			printWriter.print("<p> " + request.getMethod() + " || " + request.getRequestURI() 
+			+ " || " + request.getProtocol() 
+			+ " || " + request.getRequestURL().toString() + " || " +" </p>");
 
 			printWriter.close();
 

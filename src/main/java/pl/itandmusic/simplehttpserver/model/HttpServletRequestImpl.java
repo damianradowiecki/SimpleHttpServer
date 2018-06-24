@@ -20,13 +20,20 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	private HttpMethod method;
 	private URI requestURI;
 	private String protocol;
-	
-	private HttpServletRequestImpl(HttpMethod method, URI requestURI, String protocol) {
+	private StringBuffer requestURL;
+	private String queryString;
+	private Map<String,Enumeration<String>> headers;
+
+	private HttpServletRequestImpl(HttpMethod method, URI requestURI, String protocol, StringBuffer requestURL,
+			String queryString, Map<String,Enumeration<String>> headers) {
 		this.method = method;
 		this.requestURI = requestURI;
 		this.protocol = protocol;
+		this.requestURL = requestURL;
+		this.queryString = queryString;
+		this.headers = headers;
 	}
-	
+
 	@Override
 	public Object getAttribute(String arg0) {
 		// TODO Auto-generated method stub
@@ -225,8 +232,10 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
-	public String getHeader(String arg0) {
-		// TODO Auto-generated method stub
+	public String getHeader(String name) {
+		if(headers.get(name).hasMoreElements()) {
+			return headers.get(name).nextElement();
+		}
 		return null;
 	}
 
@@ -237,9 +246,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
-	public Enumeration getHeaders(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public Enumeration<String> getHeaders(String name) {
+		return headers.get(name);
 	}
 
 	@Override
@@ -267,8 +275,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public String getQueryString() {
-		// TODO Auto-generated method stub
-		return null;
+		return queryString;
 	}
 
 	@Override
@@ -284,8 +291,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public StringBuffer getRequestURL() {
-		// TODO Auto-generated method stub
-		return null;
+		return requestURL;
 	}
 
 	@Override
@@ -347,28 +353,46 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
-	public static class Builder{
+
+	public static class Builder {
 		private HttpMethod method;
 		private String protocol;
 		private URI requestURI;
+		private StringBuffer requestURL;
+		private String queryString;
+		private Map<String,Enumeration<String>> headers;
 		
 		public HttpServletRequestImpl build() {
-			return new HttpServletRequestImpl(method,requestURI, protocol);
+			return new HttpServletRequestImpl(method, requestURI, protocol, requestURL, queryString, headers);
 		}
-		
+
 		public Builder setHttpMethod(HttpMethod method) {
 			this.method = method;
 			return this;
 		}
-		
+
 		public Builder setProtocol(String protocol) {
 			this.protocol = protocol;
 			return this;
 		}
-		
+
 		public Builder setRequestURI(URI requestURI) {
 			this.requestURI = requestURI;
+			return this;
+		}
+
+		public Builder setRequestURL(StringBuffer requestURL) {
+			this.requestURL = requestURL;
+			return this;
+		}
+
+		public Builder setQueryString(String queryString) {
+			this.queryString = queryString;
+			return this;
+		}
+		
+		public Builder setHeaders(Map<String,Enumeration<String>> headers) {
+			this.headers = headers;
 			return this;
 		}
 	}
