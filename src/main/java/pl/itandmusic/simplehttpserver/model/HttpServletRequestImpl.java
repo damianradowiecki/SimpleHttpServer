@@ -23,15 +23,22 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	private StringBuffer requestURL;
 	private String queryString;
 	private Map<String,Enumeration<String>> headers;
+	private Enumeration<String> headerNames;
+	private String remoteAddress;
+	private ServletInputStream servletInputStream;
 
 	private HttpServletRequestImpl(HttpMethod method, URI requestURI, String protocol, StringBuffer requestURL,
-			String queryString, Map<String,Enumeration<String>> headers) {
+			String queryString, Map<String,Enumeration<String>> headers, Enumeration<String> headerNames,
+			String remoteAddress, ServletInputStream servletInputStream) {
 		this.method = method;
 		this.requestURI = requestURI;
 		this.protocol = protocol;
 		this.requestURL = requestURL;
 		this.queryString = queryString;
 		this.headers = headers;
+		this.headerNames = headerNames;
+		this.remoteAddress = remoteAddress;
+		this.servletInputStream = servletInputStream;
 	}
 
 	@Override
@@ -66,8 +73,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public ServletInputStream getInputStream() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return servletInputStream;
 	}
 
 	@Override
@@ -143,8 +149,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public String getRemoteAddr() {
-		// TODO Auto-generated method stub
-		return null;
+		return remoteAddress;
 	}
 
 	@Override
@@ -240,9 +245,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
-	public Enumeration getHeaderNames() {
-		// TODO Auto-generated method stub
-		return null;
+	public Enumeration<String> getHeaderNames() {
+		return headerNames;
 	}
 
 	@Override
@@ -361,9 +365,13 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		private StringBuffer requestURL;
 		private String queryString;
 		private Map<String,Enumeration<String>> headers;
+		private Enumeration<String> headerNames;
+		private String remoteAddress;
+		private ServletInputStream servletInputStream;
 		
 		public HttpServletRequestImpl build() {
-			return new HttpServletRequestImpl(method, requestURI, protocol, requestURL, queryString, headers);
+			return new HttpServletRequestImpl(method, requestURI, protocol, requestURL, 
+					queryString, headers, headerNames, remoteAddress, servletInputStream);
 		}
 
 		public Builder setHttpMethod(HttpMethod method) {
@@ -393,6 +401,21 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		
 		public Builder setHeaders(Map<String,Enumeration<String>> headers) {
 			this.headers = headers;
+			return this;
+		}
+		
+		public Builder setHeaderNames(Enumeration<String> headerNames) {
+			this.headerNames = headerNames;
+			return this;
+		}
+		
+		public Builder setRemoteAddress(String remoteAddress) {
+			this.remoteAddress = remoteAddress;
+			return this;
+		}
+		
+		public Builder setServletInputStream(ServletInputStream servletInputStream) {
+			this.servletInputStream = servletInputStream;
 			return this;
 		}
 	}

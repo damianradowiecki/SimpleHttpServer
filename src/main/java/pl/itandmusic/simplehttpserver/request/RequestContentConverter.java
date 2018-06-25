@@ -1,9 +1,11 @@
 package pl.itandmusic.simplehttpserver.request;
 
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -11,9 +13,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletInputStream;
+
+import pl.itandmusic.simplehttpserver.model.HeaderNames;
 import pl.itandmusic.simplehttpserver.model.HeaderValues;
 import pl.itandmusic.simplehttpserver.model.HttpMethod;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
+import pl.itandmusic.simplehttpserver.model.ServletInputStreamImpl;
 
 public class RequestContentConverter {
 
@@ -25,8 +31,11 @@ public class RequestContentConverter {
 	private StringBuffer requestURL;
 	private String queryString;
 	private Map<String, Enumeration<String>> headers;
+	private Enumeration<String> headerNames;
+	private String remoteAddress;
+	private ServletInputStream servletInputStream;
 
-	public HttpServletRequestImpl convert(List<String> content) {
+	public HttpServletRequestImpl convert(List<String> content, Socket socket) {
 
 		httpMethod = extractHttpMethod(content);
 		protocol = extractProtocol(content);
@@ -34,11 +43,23 @@ public class RequestContentConverter {
 		requestURL = extractURL(content);
 		queryString = extractQueryString(content);
 		headers = extractHeaders(content);
+		headerNames = extractHeaderNames(content);
+		remoteAddress = extractRemoteHost(socket);
+		servletInputStream = new ServletInputStreamImpl(socket);
 
 		HttpServletRequestImpl.Builder builder = new HttpServletRequestImpl.Builder();
 
-		return builder.setHttpMethod(httpMethod).setProtocol(protocol).setRequestURI(requestURI)
-				.setRequestURL(requestURL).setQueryString(queryString).setHeaders(headers).build();
+		return builder
+				.setHttpMethod(httpMethod)
+				.setProtocol(protocol)
+				.setRequestURI(requestURI)
+				.setRequestURL(requestURL)
+				.setQueryString(queryString)
+				.setHeaders(headers)
+				.setHeaderNames(headerNames)
+				.setRemoteAddress(remoteAddress)
+				.setServletInputStream(servletInputStream)
+				.build();
 	}
 
 	HttpMethod extractHttpMethod(List<String> content) {
@@ -107,5 +128,26 @@ public class RequestContentConverter {
 			}
 		}
 		return headers;
+	}
+	
+	Enumeration<String> extractHeaderNames(List<String> content){
+		
+		List<String> names = new ArrayList<>();
+		
+		pattern = Pattern.compile("(?<NAME>.+?):(.+?,.+?)*");
+
+		for (String s : content) {
+			matcher = pattern.matcher(s);
+			if (matcher.matches()) {
+				String headerName = matcher.group("NAME");
+				names.add(headerName);
+			}
+		}
+		
+		return new HeaderNames(names);
+	}
+	
+	String extractRemoteHost(Socket socket) {
+		return socket.getRemoteSocketAddress().toString();
 	}
 }

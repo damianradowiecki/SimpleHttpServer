@@ -25,7 +25,7 @@ public class RequestThread implements Runnable {
 		try {
 			
 			List<String> content = requestContentReader.read(socket);
-			HttpServletRequestImpl request = requestContentConverter.convert(content);
+			HttpServletRequestImpl request = requestContentConverter.convert(content, socket);
 			
 			printWriter = new PrintWriter(socket.getOutputStream());
 			printWriter.println("HTTP/1.1 OK 200");

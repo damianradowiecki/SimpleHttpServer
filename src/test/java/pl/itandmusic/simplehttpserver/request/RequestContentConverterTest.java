@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import pl.itandmusic.simplehttpserver.model.HeaderNames;
 import pl.itandmusic.simplehttpserver.model.HeaderValues;
 
 public class RequestContentConverterTest {
@@ -108,4 +109,21 @@ public class RequestContentConverterTest {
 			
 		}
 	}
+	
+	public void testHeaderNamesExtracting() {
+		Enumeration<String> headerNames = requestContentConverter.extractHeaderNames(content_1);
+		
+		List<String> headerNames_ = new ArrayList<>();
+		
+		while(headerNames.hasMoreElements()) {
+			String headerName = headerNames.nextElement();
+			headerNames_.add(headerName);
+		}
+		
+		assertTrue(headerNames_.contains("Accept-Charset"));
+		assertTrue(headerNames_.contains("Accept-Language"));
+		assertTrue(headerNames_.contains("Host"));
+		
+	}
+	
 }

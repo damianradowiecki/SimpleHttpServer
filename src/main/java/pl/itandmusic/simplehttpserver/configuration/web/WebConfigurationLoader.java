@@ -22,6 +22,7 @@ public class WebConfigurationLoader {
 			Unmarshaller um = context.createUnmarshaller();
 			WebApp webApp = (WebApp) um.unmarshal(new FileReader(webXml));
 			loadServletMappings(webApp);
+			Configuration.appName = webApp.getDisplayName();
 		} else {
 			throw new FileNotFoundException("Cannot find web.xml file");
 		}
