@@ -1,8 +1,12 @@
 package pl.itandmusic.simplehttpserver.model;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Set;
@@ -63,8 +67,14 @@ public class ServletContextImpl implements ServletContext {
 
 	@Override
 	public String getMimeType(String filePath) {
-		// TODO Auto-generated method stub
-		return null;
+		String mimeType;
+		try {
+			Path path = Paths.get(filePath);
+			mimeType = Files.probeContentType(path);
+		} catch(IOException exception) {
+			mimeType = null;
+		}
+		return mimeType;
 	}
 
 	@Override
@@ -73,8 +83,8 @@ public class ServletContextImpl implements ServletContext {
 	}
 
 	@Override
-	public RequestDispatcher getNamedDispatcher(String arg0) {
-		// TODO Auto-generated method stub
+	public RequestDispatcher getNamedDispatcher(String name) {
+		
 		return null;
 	}
 

@@ -3,13 +3,27 @@ package pl.itandmusic.simplehttpserver.model;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 public class HttpServletResponseImpl implements HttpServletResponse {
-	
+
+	private String contentType;
+	private Map<String, String> headers;
+	private PrintWriter printWriter;
+	private ServletOutputStream servletOutputStream;
+
+	private HttpServletResponseImpl(String contentType, Map<String, String> headers, PrintWriter printWriter,
+			ServletOutputStream servletOutputStream) {
+		this.contentType = contentType;
+		this.headers = headers;
+		this.printWriter = printWriter;
+		this.servletOutputStream = servletOutputStream;
+	}
+
 	@Override
 	public void flushBuffer() throws IOException {
 		// TODO Auto-generated method stub
@@ -30,8 +44,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 
 	@Override
 	public String getContentType() {
-		// TODO Auto-generated method stub
-		return null;
+		return contentType;
 	}
 
 	@Override
@@ -42,14 +55,12 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 
 	@Override
 	public ServletOutputStream getOutputStream() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return servletOutputStream;
 	}
 
 	@Override
 	public PrintWriter getWriter() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return printWriter;
 	}
 
 	@Override
@@ -107,27 +118,23 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	}
 
 	@Override
-	public void addDateHeader(String arg0, long arg1) {
-		// TODO Auto-generated method stub
-
+	public void addDateHeader(String name, long value) {
+		headers.put(name, String.valueOf(value));
 	}
 
 	@Override
-	public void addHeader(String arg0, String arg1) {
-		// TODO Auto-generated method stub
-
+	public void addHeader(String name, String value) {
+		headers.put(name, value);
 	}
 
 	@Override
-	public void addIntHeader(String arg0, int arg1) {
-		// TODO Auto-generated method stub
-
+	public void addIntHeader(String name, int value) {
+		headers.put(name, String.valueOf(value));
 	}
 
 	@Override
-	public boolean containsHeader(String arg0) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean containsHeader(String name) {
+		return headers.get(name) != null;
 	}
 
 	@Override
@@ -179,15 +186,13 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	}
 
 	@Override
-	public void setHeader(String arg0, String arg1) {
-		// TODO Auto-generated method stub
-
+	public void setHeader(String name, String value) {
+		headers.put(name, value);
 	}
 
 	@Override
-	public void setIntHeader(String arg0, int arg1) {
-		// TODO Auto-generated method stub
-
+	public void setIntHeader(String name, int value) {
+		headers.put(name, String.valueOf(value));
 	}
 
 	@Override
@@ -200,6 +205,38 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	public void setStatus(int arg0, String arg1) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	public static class Builder{
+		private String contentType;
+		private Map<String, String> headers;
+		private PrintWriter printWriter;
+		private ServletOutputStream servletOutputStream;
+		
+		public HttpServletResponseImpl build() {
+			
+			return new HttpServletResponseImpl(contentType, headers, printWriter, servletOutputStream);
+		}
+		
+		public Builder setContentType(String contentType) {
+			this.contentType = contentType;
+			return this;
+		}
+		
+		public Builder setHeaders(Map<String, String> headers) {
+			this.headers = headers;
+			return this;
+		}
+		
+		public Builder setPrintWriter(PrintWriter printWriter) {
+			this.printWriter = printWriter;
+			return this;
+		}
+		
+		public Builder setServletOutputStream(ServletOutputStream servletOutputStream) {
+			this.servletOutputStream = servletOutputStream;
+			return this;
+		}
 	}
 
 }
