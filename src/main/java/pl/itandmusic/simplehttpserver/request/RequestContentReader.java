@@ -7,28 +7,91 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import pl.itandmusic.simplehttpserver.logger.LogLevel;
+import pl.itandmusic.simplehttpserver.logger.Logger;
+import pl.itandmusic.simplehttpserver.model.RequestContent;
+
 public class RequestContentReader {
 
 	private Socket socket;
-	private List<String> content = new ArrayList<>();
+	private InputStreamReader inputStreamReader;
+	private BufferedReader bufferedReader;
+	private RequestContent content = new RequestContent();
+	private List<String> plainContent = new ArrayList<>();
+	private String postData = "";
 
-	public List<String> read(Socket socket) {
+	public RequestContent read(Socket socket) {
 		this.socket = socket;
-
 		try {
-			InputStreamReader inputStreamReader = new InputStreamReader(this.socket.getInputStream());
-			BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+			inputStreamReader = new InputStreamReader(this.socket.getInputStream());
+			bufferedReader = new BufferedReader(inputStreamReader);
 
-			String line;
+			readPlainContent();
+			readPostData();
 
-			while (!(line = bufferedReader.readLine()).equals("")) {
-				content.add(line);
-			}
+			content.setPlainContent(plainContent);
+			content.setPostData(postData);
 
 		} catch (IOException ioException) {
 			ioException.printStackTrace();
 		}
 
 		return content;
+	}
+
+	private void readPlainContent() {
+		try {
+
+			String line;
+
+			while ((line = bufferedReader.readLine()) != null && (line.length() != 0)) {
+				plainContent.add(line);
+			}
+
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
+		}
+
+	}
+
+	private void readPostData() {
+		try {
+			int contentLengthHeaderValue = -1;
+
+			for (String line : plainContent) {
+				if (hasContentLengthHeader(line)) {
+					contentLengthHeaderValue = getContentLengthValue(line);
+					break;
+				}
+			}
+			postData = readPostData(bufferedReader, contentLengthHeaderValue);
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
+		}
+	}
+
+	private boolean hasContentLengthHeader(String line) {
+		return line.contains("Content-Length:");
+	}
+
+	private int getContentLengthValue(String line) {
+		int result = -1;
+		try {
+			String value = line.replace("Content-Length:", "").trim();
+			result = Integer.valueOf(value);
+		} catch (Exception exception) {
+			Logger.log(exception.getMessage(), LogLevel.WARN);
+		}
+		return result;
+	}
+
+	private String readPostData(BufferedReader bufferedReader, int contentLengthHeaderValue) throws IOException {
+		String postData = "";
+		if (contentLengthHeaderValue > 0) {
+			char[] charArray = new char[contentLengthHeaderValue];
+			bufferedReader.read(charArray, 0, contentLengthHeaderValue);
+			postData = new String(charArray);
+		}
+		return postData;
 	}
 }

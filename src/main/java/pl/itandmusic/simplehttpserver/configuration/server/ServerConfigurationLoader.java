@@ -9,10 +9,15 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
+import pl.itandmusic.simplehttpserver.logger.LogLevel;
+import pl.itandmusic.simplehttpserver.logger.Logger;
 
 public class ServerConfigurationLoader {
 
 	public static void load() throws JAXBException, FileNotFoundException {
+		
+		Logger.log("Server configuration loading.", LogLevel.INFO);
+		
 		File serverXml = new File("/home/damian/eclipse-workspace/Other/SimpleHttpServer/config/server.xml");
 		if (serverXml.exists()) {
 			JAXBContext context = JAXBContext.newInstance(ServerConfig.class);
@@ -23,6 +28,8 @@ public class ServerConfigurationLoader {
 		} else {
 			throw new FileNotFoundException("Cannot find server.xml file");
 		}
-		System.out.println("Server configuration loaded.");
+		
+		Logger.log("Server configuration loaded.", LogLevel.INFO);
+		
 	}
 }

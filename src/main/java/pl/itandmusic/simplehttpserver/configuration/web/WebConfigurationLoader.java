@@ -12,22 +12,29 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
+import pl.itandmusic.simplehttpserver.logger.LogLevel;
+import pl.itandmusic.simplehttpserver.logger.Logger;
 
 public class WebConfigurationLoader {
 
 	public static void load() throws JAXBException, FileNotFoundException, MalformedURLException, ClassNotFoundException {
+		
+		Logger.log("Web configuration loading.", LogLevel.INFO);
+		
 		File webXml = new File(Configuration.appDirectory + "/WEB-INF/web.xml");
 		if (webXml.exists()) {
 			JAXBContext context = JAXBContext.newInstance(WebApp.class);
 			Unmarshaller um = context.createUnmarshaller();
 			WebApp webApp = (WebApp) um.unmarshal(new FileReader(webXml));
 			loadServletMappings(webApp);
+			Configuration.defaultPages.addAll(webApp.getWelcomeFiles());
 			Configuration.appName = webApp.getDisplayName();
 		} else {
 			throw new FileNotFoundException("Cannot find web.xml file");
 		}
 		
-		System.out.println("Web configuration loaded.");
+		Logger.log("Web configuration loaded.", LogLevel.INFO);
+		
 	}
 
 	private static void loadServletMappings(WebApp webApp) throws MalformedURLException, ClassNotFoundException {
@@ -47,4 +54,5 @@ public class WebConfigurationLoader {
 		}
 		
 	}
+	
 }

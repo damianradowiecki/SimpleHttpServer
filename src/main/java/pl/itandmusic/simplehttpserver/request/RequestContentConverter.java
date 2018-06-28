@@ -15,10 +15,13 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletInputStream;
 
+import pl.itandmusic.simplehttpserver.logger.LogLevel;
+import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.HeaderNames;
 import pl.itandmusic.simplehttpserver.model.HeaderValues;
 import pl.itandmusic.simplehttpserver.model.HttpMethod;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
+import pl.itandmusic.simplehttpserver.model.RequestContent;
 import pl.itandmusic.simplehttpserver.model.ServletInputStreamImpl;
 
 public class RequestContentConverter {
@@ -35,15 +38,18 @@ public class RequestContentConverter {
 	private String remoteAddress;
 	private ServletInputStream servletInputStream;
 
-	public HttpServletRequestImpl convert(List<String> content, Socket socket) {
+	public HttpServletRequestImpl convert(RequestContent content, Socket socket) {
 
-		httpMethod = extractHttpMethod(content);
-		protocol = extractProtocol(content);
-		requestURI = extractURI(content);
-		requestURL = extractURL(content);
-		queryString = extractQueryString(content);
-		headers = extractHeaders(content);
-		headerNames = extractHeaderNames(content);
+		List<String> plainContent = content.getPlainContent();
+		String postData = content.getPostData();
+		
+		httpMethod = extractHttpMethod(plainContent);
+		protocol = extractProtocol(plainContent);
+		requestURI = extractURI(plainContent);
+		requestURL = extractURL(plainContent);
+		queryString = extractQueryString(plainContent);
+		headers = extractHeaders(plainContent);
+		headerNames = extractHeaderNames(plainContent);
 		remoteAddress = extractRemoteHost(socket);
 		servletInputStream = new ServletInputStreamImpl(socket);
 
@@ -102,7 +108,7 @@ public class RequestContentConverter {
 			String uri_ = uri.toASCIIString();
 			stringBUffer.append(uri_);
 		} catch (UnknownHostException | NullPointerException exception) {
-			System.out.println(exception.getMessage());
+			Logger.log(exception.getMessage(), LogLevel.ERROR);
 		}
 		return stringBUffer;
 	}
