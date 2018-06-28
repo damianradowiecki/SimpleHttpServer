@@ -30,7 +30,7 @@ public class RequestContentReader {
 			readPostData();
 
 			content.setPlainContent(plainContent);
-			content.setPostData(postData);
+			content.setPOSTData(postData);
 
 		} catch (IOException ioException) {
 			ioException.printStackTrace();

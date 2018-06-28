@@ -5,7 +5,7 @@ import java.util.List;
 public class RequestContent {
 
 	private List<String> plainContent;
-	private String postData;
+	private String POSTData;
 
 	public List<String> getPlainContent() {
 		return plainContent;
@@ -15,12 +15,12 @@ public class RequestContent {
 		this.plainContent = plainContent;
 	}
 
-	public String getPostData() {
-		return postData;
+	public String getPOSTData() {
+		return POSTData;
 	}
 
-	public void setPostData(String postData) {
-		this.postData = postData;
+	public void setPOSTData(String POSTData) {
+		this.POSTData = POSTData;
 	}
 	
 	public boolean empty() {

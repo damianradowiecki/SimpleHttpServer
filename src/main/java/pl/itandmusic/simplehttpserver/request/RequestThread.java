@@ -114,7 +114,6 @@ public class RequestThread implements Runnable {
 					String line;
 					while((line = reader.readLine()) != null) {
 						writer.println(line);
-						writer.flush();
 					}
 					writer.flush();
 					writer.close();

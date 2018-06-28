@@ -26,6 +26,8 @@ import pl.itandmusic.simplehttpserver.model.ServletInputStreamImpl;
 
 public class RequestContentConverter {
 
+	private static final String PARAMS_DELIMITER = "&";
+	private static final String KEY_VALUE_DELIMITER = "=";
 	private Pattern pattern;
 	private Matcher matcher;
 	private HttpMethod httpMethod;
@@ -37,11 +39,12 @@ public class RequestContentConverter {
 	private Enumeration<String> headerNames;
 	private String remoteAddress;
 	private ServletInputStream servletInputStream;
+	private Map<String, String> parameters;
 
 	public HttpServletRequestImpl convert(RequestContent content, Socket socket) {
 
 		List<String> plainContent = content.getPlainContent();
-		String postData = content.getPostData();
+		String postData = content.getPOSTData();
 		
 		httpMethod = extractHttpMethod(plainContent);
 		protocol = extractProtocol(plainContent);
@@ -52,6 +55,7 @@ public class RequestContentConverter {
 		headerNames = extractHeaderNames(plainContent);
 		remoteAddress = extractRemoteHost(socket);
 		servletInputStream = new ServletInputStreamImpl(socket);
+		parameters = extractParameters(content, httpMethod);
 
 		HttpServletRequestImpl.Builder builder = new HttpServletRequestImpl.Builder();
 
@@ -65,6 +69,7 @@ public class RequestContentConverter {
 				.setHeaderNames(headerNames)
 				.setRemoteAddress(remoteAddress)
 				.setServletInputStream(servletInputStream)
+				.setParameters(parameters)
 				.build();
 	}
 
@@ -155,5 +160,33 @@ public class RequestContentConverter {
 	
 	String extractRemoteHost(Socket socket) {
 		return socket.getRemoteSocketAddress().toString();
+	}
+	
+	Map<String, String> extractParameters(RequestContent content, HttpMethod httpMethod) {
+		Map<String, String> result = new HashMap<>();
+		if(httpMethod.equals(HttpMethod.GET)) {
+			result = extractParameters(content.getPlainContent());
+		}
+		else if(httpMethod.equals(HttpMethod.POST)) {
+			result = extractParameters(content.getPOSTData());
+		}
+		return result;
+	}
+	
+	Map<String, String> extractParameters(List<String> content) {
+		Map<String, String> result = new HashMap<>();
+		return result;
+	}
+	
+	Map<String, String> extractParameters(String postData) {
+		Map<String, String> result = new HashMap<>();
+		String [] params = postData.split(PARAMS_DELIMITER);
+		for(String p : params) {
+			String [] keyValuePairs = p.split(KEY_VALUE_DELIMITER);
+			String key = keyValuePairs[0].trim();
+			String value = keyValuePairs[1].trim();
+			result.put(key, value);
+		}
+		return result;
 	}
 }

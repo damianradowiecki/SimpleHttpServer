@@ -26,10 +26,11 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	private Enumeration<String> headerNames;
 	private String remoteAddress;
 	private ServletInputStream servletInputStream;
+	private Map<String, String> parameters;
 
 	private HttpServletRequestImpl(HttpMethod method, URI requestURI, String protocol, StringBuffer requestURL,
 			String queryString, Map<String,Enumeration<String>> headers, Enumeration<String> headerNames,
-			String remoteAddress, ServletInputStream servletInputStream) {
+			String remoteAddress, ServletInputStream servletInputStream, Map<String, String> parameters) {
 		this.method = method;
 		this.requestURI = requestURI;
 		this.protocol = protocol;
@@ -39,6 +40,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		this.headerNames = headerNames;
 		this.remoteAddress = remoteAddress;
 		this.servletInputStream = servletInputStream;
+		this.parameters = parameters;
 	}
 
 	@Override
@@ -107,15 +109,13 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
-	public String getParameter(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public String getParameter(String name) {
+		return parameters.get(name);
 	}
 
 	@Override
-	public Map getParameterMap() {
-		// TODO Auto-generated method stub
-		return null;
+	public Map<String, String> getParameterMap() {
+		return parameters;
 	}
 
 	@Override
@@ -126,8 +126,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public String[] getParameterValues(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
+		return parameters.values().toArray(new String[0]);
 	}
 
 	@Override
@@ -368,10 +367,12 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		private Enumeration<String> headerNames;
 		private String remoteAddress;
 		private ServletInputStream servletInputStream;
+		private Map<String, String> parameters;
 		
 		public HttpServletRequestImpl build() {
 			return new HttpServletRequestImpl(method, requestURI, protocol, requestURL, 
-					queryString, headers, headerNames, remoteAddress, servletInputStream);
+					queryString, headers, headerNames, remoteAddress, servletInputStream,
+					parameters);
 		}
 
 		public Builder setHttpMethod(HttpMethod method) {
@@ -416,6 +417,11 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		
 		public Builder setServletInputStream(ServletInputStream servletInputStream) {
 			this.servletInputStream = servletInputStream;
+			return this;
+		}
+		
+		public Builder setParameters(Map<String, String> parameters) {
+			this.parameters = parameters;
 			return this;
 		}
 	}
