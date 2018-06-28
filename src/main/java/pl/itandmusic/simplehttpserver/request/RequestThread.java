@@ -97,7 +97,7 @@ public class RequestThread implements Runnable {
 		writer.println("Content-Type: " + response.getContentType());
 		writer.println();
 		
-		String servletPrintContent = response.getStringWriter().toString();
+		StringBuffer servletPrintContent = response.getStringWriter().getBuffer();
 		
 		writer.print(servletPrintContent);
 		
