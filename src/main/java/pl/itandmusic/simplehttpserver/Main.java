@@ -16,14 +16,5 @@ public class Main {
 		WebConfigurationLoader.load();
 		Server.start();
 	}
-	
-	
-	//TODO LIST
-	/*
-	 * Obsługa wczytywania pierwszej/domyslnej strony
-	 * Implementacja ServletOutputStream
-	 * powiązanie ServletOutputStream z PrintWriterem - żeby dwa pisały do jednego strumienia
-	 * generowanie odpowiedzi
-	 */
 
 }

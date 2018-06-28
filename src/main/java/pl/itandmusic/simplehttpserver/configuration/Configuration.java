@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class Configuration {
 	
+	public static String serverName = "DRServer";
 	public static String appName;
 	public static int port;
 	public static String appDirectory;
