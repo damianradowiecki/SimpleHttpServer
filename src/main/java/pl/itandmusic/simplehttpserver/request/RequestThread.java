@@ -1,9 +1,6 @@
 package pl.itandmusic.simplehttpserver.request;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,7 +9,6 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -23,7 +19,6 @@ import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 import pl.itandmusic.simplehttpserver.model.HttpServletResponseImpl;
 import pl.itandmusic.simplehttpserver.model.RequestContent;
-import pl.itandmusic.simplehttpserver.response.ResponseGenerator;
 
 public class RequestThread implements Runnable {
 
@@ -32,13 +27,11 @@ public class RequestThread implements Runnable {
 	private HttpServletResponseImpl response;
 	private RequestContentReader requestContentReader;
 	private RequestContentConverter requestContentConverter;
-	private ResponseGenerator responseGenerator;
 
 	public RequestThread(Socket socket) {
 		this.socket = socket;
 		this.requestContentReader = new RequestContentReader();
 		this.requestContentConverter = new RequestContentConverter();
-		this.responseGenerator = new ResponseGenerator();
 	}
 
 	@Override
@@ -50,7 +43,7 @@ public class RequestThread implements Runnable {
 			return;
 		}
 		request = requestContentConverter.convert(content, socket);
-		response = responseGenerator.generate(content, request, socket);
+		response = new HttpServletResponseImpl();
 		String  requestURI = request.getRequestURI().toString();
 		
 		if(requestURI.equals("/") || requestURI.equals("\\")) {
@@ -70,6 +63,7 @@ public class RequestThread implements Runnable {
 				}
 				Servlet servlet = (Servlet)servletClass.newInstance();
 				servlet.service(request, response);
+				sendResponse(socket, response);
 			} catch (InstantiationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -94,6 +88,24 @@ public class RequestThread implements Runnable {
 		}
 	}
 	
+	private void sendResponse(Socket socket, HttpServletResponseImpl response) throws IOException {
+		OutputStream os = socket.getOutputStream();
+		PrintWriter writer = new PrintWriter(os);
+		
+		
+		writer.println("HTTP/1.1 200 OK");
+		writer.println("Content-Type: " + response.getContentType());
+		writer.println();
+		
+		String servletPrintContent = response.getStringWriter().toString();
+		
+		writer.print(servletPrintContent);
+		
+		writer.flush();
+		writer.close();
+
+	}
+
 	private void loadDefaultPage(Socket socket) throws IOException {
 		String appDirectory = Configuration.appDirectory;
 		Path path = Paths.get(appDirectory);

@@ -2,6 +2,8 @@ package pl.itandmusic.simplehttpserver.model;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -11,18 +13,10 @@ import javax.servlet.http.HttpServletResponse;
 
 public class HttpServletResponseImpl implements HttpServletResponse {
 
-	private String contentType;
-	private Map<String, String> headers;
-	private PrintWriter printWriter;
+	private String contentType = "text/html";
+	private Map<String, String> headers = new HashMap<>();
+	private StringWriter stringWriter = new StringWriter();
 	private ServletOutputStream servletOutputStream;
-
-	private HttpServletResponseImpl(String contentType, Map<String, String> headers, PrintWriter printWriter,
-			ServletOutputStream servletOutputStream) {
-		this.contentType = contentType;
-		this.headers = headers;
-		this.printWriter = printWriter;
-		this.servletOutputStream = servletOutputStream;
-	}
 
 	@Override
 	public void flushBuffer() throws IOException {
@@ -57,10 +51,14 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	public ServletOutputStream getOutputStream() throws IOException {
 		return servletOutputStream;
 	}
+	
+	public StringWriter getStringWriter() {
+		return stringWriter;
+	}
 
 	@Override
 	public PrintWriter getWriter() throws IOException {
-		return printWriter;
+		return new PrintWriter(stringWriter);
 	}
 
 	@Override
@@ -100,9 +98,8 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	}
 
 	@Override
-	public void setContentType(String arg0) {
-		// TODO Auto-generated method stub
-
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
 	}
 
 	@Override
@@ -184,6 +181,10 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 		// TODO Auto-generated method stub
 
 	}
+	
+	public Map<String, String> getHeaders(){
+		return headers;
+	}
 
 	@Override
 	public void setHeader(String name, String value) {
@@ -205,38 +206,6 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	public void setStatus(int arg0, String arg1) {
 		// TODO Auto-generated method stub
 
-	}
-	
-	public static class Builder{
-		private String contentType;
-		private Map<String, String> headers;
-		private PrintWriter printWriter;
-		private ServletOutputStream servletOutputStream;
-		
-		public HttpServletResponseImpl build() {
-			
-			return new HttpServletResponseImpl(contentType, headers, printWriter, servletOutputStream);
-		}
-		
-		public Builder setContentType(String contentType) {
-			this.contentType = contentType;
-			return this;
-		}
-		
-		public Builder setHeaders(Map<String, String> headers) {
-			this.headers = headers;
-			return this;
-		}
-		
-		public Builder setPrintWriter(PrintWriter printWriter) {
-			this.printWriter = printWriter;
-			return this;
-		}
-		
-		public Builder setServletOutputStream(ServletOutputStream servletOutputStream) {
-			this.servletOutputStream = servletOutputStream;
-			return this;
-		}
 	}
 
 }
