@@ -7,12 +7,13 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import pl.itandmusic.simplehttpserver.logger.LogLevel;
+import pl.itandmusic.simplehttpserver.configuration.web.WebConfigurationLoader;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.RequestContent;
 
 public class RequestContentReader {
 
+	private static final Logger logger = Logger.getLogger(WebConfigurationLoader.class);
 	private Socket socket;
 	private InputStreamReader inputStreamReader;
 	private BufferedReader bufferedReader;
@@ -80,7 +81,7 @@ public class RequestContentReader {
 			String value = line.replace("Content-Length:", "").trim();
 			result = Integer.valueOf(value);
 		} catch (Exception exception) {
-			Logger.log(exception.getMessage(), LogLevel.WARN);
+			logger.warn(exception.getMessage());
 		}
 		return result;
 	}

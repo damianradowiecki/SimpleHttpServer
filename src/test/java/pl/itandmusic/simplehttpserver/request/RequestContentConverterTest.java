@@ -14,14 +14,17 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import pl.itandmusic.simplehttpserver.model.HeaderNames;
 import pl.itandmusic.simplehttpserver.model.HeaderValues;
+import pl.itandmusic.simplehttpserver.model.RequestContent;
 
 public class RequestContentConverterTest {
 
 	private static RequestContentConverter requestContentConverter;
 	private List<String> content_1;
 	private List<String> content_2;
+	private String POSTData;
+	private RequestContent getRequestContent;
+	private RequestContent postRequestContent;
 
 	@BeforeClass
 	public static void prepare() {
@@ -36,11 +39,19 @@ public class RequestContentConverterTest {
 		content_1.add("Accept-Language: en-us, en;q=0.5");
 		content_1.add("Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7");
 		
+		getRequestContent = new RequestContent();
+		getRequestContent.setPlainContent(content_1);
+		
 		
 		
 		content_2 = new ArrayList<>();
 		content_2.add("POST /any/resource/on/server/test HTTP/2.0");
-		// TODO the rest
+		
+		POSTData = "kolor = ciemny& smak=slodkawy";
+		
+		postRequestContent = new RequestContent();
+		postRequestContent.setPlainContent(content_2);
+		postRequestContent.setPOSTData(POSTData);
 	}
 
 	@Test
@@ -126,4 +137,12 @@ public class RequestContentConverterTest {
 		
 	}
 	
+	
+	public void testPOSTParametersExtracting() {
+		Map<String, String> POSTParams = requestContentConverter.extractParameters(POSTData);
+		assertTrue(POSTParams.containsKey("kolor"));
+		assertEquals("ciemny", POSTParams.get("kolor"));
+		assertTrue(POSTParams.containsKey("smak"));
+		assertEquals("slodkawy", POSTParams.get("smak"));
+	}
 }

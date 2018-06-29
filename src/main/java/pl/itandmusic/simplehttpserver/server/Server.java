@@ -5,17 +5,18 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
-import pl.itandmusic.simplehttpserver.logger.LogLevel;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.request.RequestThread;
 
 public class Server {
 
+	private final static Logger logger = Logger.getLogger(Server.class);
+	
 	public static void start() throws IOException {
 		
 		ServerSocket serverSocket = new ServerSocket(Configuration.port);
 		
-		Logger.log("Server started.", LogLevel.INFO);
+		logger.info("Server started.");
 		
 		while(!serverSocket.isClosed()) {
 			Socket socket = serverSocket.accept();	
@@ -24,7 +25,7 @@ public class Server {
 		
 		serverSocket.close();
 		
-		Logger.log("Server stopped.", LogLevel.INFO);
+		logger.info("Server stopped.");
 		
 		
 		

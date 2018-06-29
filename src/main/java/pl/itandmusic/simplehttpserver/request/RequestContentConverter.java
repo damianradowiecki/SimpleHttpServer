@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletInputStream;
 
-import pl.itandmusic.simplehttpserver.logger.LogLevel;
+import pl.itandmusic.simplehttpserver.configuration.web.WebConfigurationLoader;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.HeaderNames;
 import pl.itandmusic.simplehttpserver.model.HeaderValues;
@@ -26,6 +26,7 @@ import pl.itandmusic.simplehttpserver.model.ServletInputStreamImpl;
 
 public class RequestContentConverter {
 
+	private static final Logger logger = Logger.getLogger(WebConfigurationLoader.class);
 	private static final String PARAMS_DELIMITER = "&";
 	private static final String KEY_VALUE_DELIMITER = "=";
 	private Pattern pattern;
@@ -44,7 +45,6 @@ public class RequestContentConverter {
 	public HttpServletRequestImpl convert(RequestContent content, Socket socket) {
 
 		List<String> plainContent = content.getPlainContent();
-		String postData = content.getPOSTData();
 		
 		httpMethod = extractHttpMethod(plainContent);
 		protocol = extractProtocol(plainContent);
@@ -113,7 +113,7 @@ public class RequestContentConverter {
 			String uri_ = uri.toASCIIString();
 			stringBUffer.append(uri_);
 		} catch (UnknownHostException | NullPointerException exception) {
-			Logger.log(exception.getMessage(), LogLevel.ERROR);
+			logger.error(exception.getMessage());
 		}
 		return stringBUffer;
 	}

@@ -14,14 +14,16 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
-import pl.itandmusic.simplehttpserver.logger.LogLevel;
+import pl.itandmusic.simplehttpserver.configuration.web.WebConfigurationLoader;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 import pl.itandmusic.simplehttpserver.model.HttpServletResponseImpl;
 import pl.itandmusic.simplehttpserver.model.RequestContent;
+import pl.itandmusic.simplehttpserver.utils.URIResolver;
 
 public class RequestThread implements Runnable {
 
+	private static final Logger logger = Logger.getLogger(WebConfigurationLoader.class);
 	private Socket socket;
 	private HttpServletRequestImpl request;
 	private HttpServletResponseImpl response;
@@ -43,51 +45,33 @@ public class RequestThread implements Runnable {
 		}
 		request = requestContentConverter.convert(content, socket);
 		response = new HttpServletResponseImpl();
-		String requestURI = request.getRequestURI().toString();
 
-		if (requestURI.equals("/") || requestURI.equals("\\")) {
-			try {
-				loadDefaultPage(socket);
-				// loadDefaultPage(socket);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		if (URIResolver.requestForDeafultPage(request)) {
+			tryToLoadDefaultPage(socket);
 		} 
-		else if((requestURI.equals("/server-info") || requestURI.equals("/server-info/"))) {
-			try {
-				loadServerPage(socket);
-				// loadDefaultPage(socket);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		else if(URIResolver.requestForServerInfoPage(request)) {
+			tryToLoadServerPage(socket);
 		}
-		else {
+		else if(URIResolver.requestForResourceOnServer(request)){
 			try {
-				Class<?> servletClass = Configuration.servletsMappings.get(requestURI);
-				if (servletClass == null) {
-					Logger.log("Resource not found: " + requestURI, LogLevel.WARN);
-					return;
-				}
+				Class<?> servletClass = loadClass(request);
 				Servlet servlet = (Servlet) servletClass.newInstance();
 				servlet.service(request, response);
 				sendResponse(socket, response);
-			} catch (InstantiationException e) {
+			} catch (InstantiationException | IllegalAccessException | ServletException | IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ServletException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			} 
+		}
+		else {
+			String requestURI = URIResolver.getRequsetURI(request);
+			logger.warn("Resource not found: " + requestURI);
 		}
 
+		tryToCloseSocket(socket);
+	}
+	
+	private void tryToCloseSocket(Socket socket) {
 		try {
 			socket.close();
 		} catch (IOException e) {
@@ -112,6 +96,16 @@ public class RequestThread implements Runnable {
 		writer.close();
 
 	}
+	
+	private void tryToLoadDefaultPage(Socket socket) {
+		try {
+			loadDefaultPage(socket);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 
 	private void loadDefaultPage(Socket socket) throws IOException {
 		String appDirectory = Configuration.appDirectory;
@@ -144,6 +138,15 @@ public class RequestThread implements Runnable {
 		}
 
 	}
+	
+	private void tryToLoadServerPage(Socket socket) {
+		try {
+			loadServerPage(socket);;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	private void loadServerPage(Socket socket) throws IOException {
 
@@ -167,6 +170,11 @@ public class RequestThread implements Runnable {
 
 		return;
 
+	}
+	
+	private Class<?> loadClass(HttpServletRequestImpl request) {
+		String requestURI = URIResolver.getRequsetURI(request);
+		return Configuration.servletsMappings.get(requestURI);
 	}
 
 }

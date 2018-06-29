@@ -12,14 +12,15 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
-import pl.itandmusic.simplehttpserver.logger.LogLevel;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 
 public class WebConfigurationLoader {
 
+	private static final Logger logger = Logger.getLogger(WebConfigurationLoader.class);
+	
 	public static void load() throws JAXBException, FileNotFoundException, MalformedURLException, ClassNotFoundException {
 		
-		Logger.log("Web configuration loading.", LogLevel.INFO);
+		logger.info("Web configuration loading.");
 		
 		File webXml = new File(Configuration.appDirectory + "/WEB-INF/web.xml");
 		if (webXml.exists()) {
@@ -33,7 +34,7 @@ public class WebConfigurationLoader {
 			throw new FileNotFoundException("Cannot find web.xml file");
 		}
 		
-		Logger.log("Web configuration loaded.", LogLevel.INFO);
+		logger.info("Web configuration loaded.");
 		
 	}
 
