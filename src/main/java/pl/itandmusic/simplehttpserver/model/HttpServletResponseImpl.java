@@ -2,7 +2,6 @@ package pl.itandmusic.simplehttpserver.model;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -11,15 +10,19 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import pl.itandmusic.simplehttpserver.buffer.ResponseOutputStreamBuffer;
+
 public class HttpServletResponseImpl implements HttpServletResponse {
 
 	private String contentType = "text/html";
 	private Map<String, String> headers = new HashMap<>();
-	private StringWriter stringWriter = new StringWriter();
-	private ServletOutputStream servletOutputStream;
+	private ResponseOutputStreamBuffer outputStreamBuffer = new ResponseOutputStreamBuffer();
+	private boolean redirectResponse;
+	private String redirectURL;
 
 	@Override
 	public void flushBuffer() throws IOException {
+		// TODO go to sending response
 		// TODO Auto-generated method stub
 
 	}
@@ -46,25 +49,24 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public ResponseOutputStreamBuffer getOutputStreamBuffer() {
+		return outputStreamBuffer;
+	}
 
 	@Override
 	public ServletOutputStream getOutputStream() throws IOException {
-		return servletOutputStream;
-	}
-	
-	public StringWriter getStringWriter() {
-		return stringWriter;
+		return outputStreamBuffer;
 	}
 
 	@Override
 	public PrintWriter getWriter() throws IOException {
-		return new PrintWriter(stringWriter);
+		return new PrintWriter(outputStreamBuffer);
 	}
 
 	@Override
 	public boolean isCommitted() {
-		// TODO Auto-generated method stub
-		return false;
+		return outputStreamBuffer.isCommited();
 	}
 
 	@Override
@@ -99,7 +101,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 
 	@Override
 	public void setContentType(String contentType) {
-		this.contentType = contentType;
+		setHeader("Content-type", contentType);
 	}
 
 	@Override
@@ -121,7 +123,14 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 
 	@Override
 	public void addHeader(String name, String value) {
-		headers.put(name, value);
+		String header = headers.get(name);
+		if(header == null) {
+			headers.put(name, value);
+		}
+		else {
+			header += "," + value;
+			headers.put(name, header);
+		}
 	}
 
 	@Override
@@ -171,9 +180,23 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	}
 
 	@Override
-	public void sendRedirect(String arg0) throws IOException {
-		// TODO Auto-generated method stub
+	public void sendRedirect(String url) throws IOException {
+		if(outputStreamBuffer.isCommited()) {
+			throw new IllegalStateException("Do not send data before redirecting");
+		}
+		else {
+			this.redirectResponse = true;
+			this.redirectURL = url;
+		}
+		
+	}
+	
+	public boolean isRedirectResponse() {
+		return redirectResponse;
+	}
 
+	public String getRedirectURL() {
+		return redirectURL;
 	}
 
 	@Override

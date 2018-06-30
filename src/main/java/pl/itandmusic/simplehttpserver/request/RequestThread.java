@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -54,12 +55,24 @@ public class RequestThread implements Runnable {
 		}
 		else if(URIResolver.requestForResourceOnServer(request)){
 			try {
+				
 				Class<?> servletClass = loadClass(request);
 				Servlet servlet = (Servlet) servletClass.newInstance();
 				servlet.service(request, response);
-				sendResponse(socket, response);
+				if(response.isRedirectResponse()) {
+					sendRedirectResponse(socket, response.getRedirectURL());
+				}
+				else {
+					sendResponse(socket, response);
+				}
+				
 			} catch (InstantiationException | IllegalAccessException | ServletException | IOException e) {
-				// TODO Auto-generated catch block
+				try {
+					sendInternalErrorResponse(socket);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				e.printStackTrace();
 			} 
 		}
@@ -81,19 +94,60 @@ public class RequestThread implements Runnable {
 	}
 
 	private void sendResponse(Socket socket, HttpServletResponseImpl response) throws IOException {
+		
 		OutputStream os = socket.getOutputStream();
-		PrintWriter writer = new PrintWriter(os);
 
-		writer.println("HTTP/1.1 200 OK");
-		writer.println("Content-Type: " + response.getContentType());
-		writer.println();
+		String mainHeader = "HTTP/1.1 200 OK";
+		String newLine = "\n";
+		
+		os.write(mainHeader.getBytes());
+		os.write(newLine.getBytes());
+		for(String headerName : response.getHeaders().keySet()) {
+			String header = headerName + " : " + response.getHeaders().get(headerName);
+			os.write(header.getBytes());
+			os.write(newLine.getBytes());
+		}
+		
+		
+		os.write(newLine.getBytes());
 
-		StringBuffer servletPrintContent = response.getStringWriter().getBuffer();
+		List<Integer> buffer = response.getOutputStreamBuffer().getBuffer();
+		
+		
+		for(int i : buffer) {
+			os.write(i);
+		}
 
-		writer.print(servletPrintContent);
+		os.close();
 
-		writer.flush();
-		writer.close();
+	}
+	
+	private void sendRedirectResponse(Socket socket, String redirectURL) throws IOException {
+		OutputStream os = socket.getOutputStream();
+
+		String mainHeader = "HTTP/1.1 302 Found";
+		String newLine = "\n";
+		String locationHeader = "Location" + " : " + redirectURL;
+		
+		os.write(mainHeader.getBytes());
+		os.write(newLine.getBytes());
+		os.write(locationHeader.getBytes());
+		os.write(newLine.getBytes());
+
+		os.close();
+
+	}
+	
+	private void sendInternalErrorResponse(Socket socket) throws IOException {
+		OutputStream os = socket.getOutputStream();
+
+		String error500Header = "HTTP/1.1 500 Internal Server Error";
+		String newLine = "\n";
+		
+		os.write(error500Header.getBytes());
+		os.write(newLine.getBytes());
+
+		os.close();
 
 	}
 	
