@@ -1,16 +1,15 @@
 package pl.itandmusic.simplehttpserver.configuration;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Configuration {
 	
-	public static String serverName = "DRServer";
-	public static String appName;
+	public final static Map<String, AppConfig> applications = new HashMap<>();
+	public final static String SERVER_NAME = "Mini HTTP Server (has servlets compability)";
 	public static int port;
-	public static String appDirectory;
-	public static Map<String, Class<?>> servletsMappings = new HashMap<>();
-	public static List<String> defaultPages = new ArrayList<>();
+	public static String appsDirectory;
+	public static final int SERVLET_MAJOR_VERSION = 2;
+	public static final int SERVLET_MINOR_VERSION = 1;
+	
 }

@@ -1,5 +1,6 @@
 Obsługa błędów - catch
 Przygotowanie wielu aplikacji serwletowych
-Obsługa uruchomienia dwóch aplikacji
+Obsługa uruchomienia wielu aplikacji (moze oddzielna pula watkow dla kazdej aplikacji??)
 Rozkład klas metod i pakietow
 O co chodzi z kodowaniem znakow
+Refaktoring - WebConfigurationLoader

@@ -12,8 +12,8 @@ class ServerConfig {
 
 	@XmlElement(name = "port")
 	private int port;
-	@XmlElement(name = "app-directory")
-	private String appDirectory;
+	@XmlElement(name = "apps-directory")
+	private String appsDirectory;
 
 	public int getPort() {
 		return port;
@@ -23,12 +23,12 @@ class ServerConfig {
 		this.port = port;
 	}
 
-	public String getAppDirectory() {
-		return appDirectory;
+	public String getAppsDirectory() {
+		return appsDirectory;
 	}
 
-	public void setAppDirectory(String appDirectory) {
-		this.appDirectory = appDirectory;
+	public void setAppsDirectory(String appsDirectory) {
+		this.appsDirectory = appsDirectory;
 	}
 
 }

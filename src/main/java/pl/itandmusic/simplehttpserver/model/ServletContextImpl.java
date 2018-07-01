@@ -16,15 +16,14 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
+import pl.itandmusic.simplehttpserver.configuration.AppConfig;
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
 
 public class ServletContextImpl implements ServletContext {
 
 	private Map<String, Object> attributes;
 	private Map<String, String> initParams;
-	private final int servletMajorVersion = 2;
-	private final int servletMinorVersion = 1;
-	private final String serverInfo = "DamianRadowieckiServer/1.0";
+	private AppConfig appConfig;
 	
 	@Override
 	public Object getAttribute(String name) {
@@ -62,7 +61,7 @@ public class ServletContextImpl implements ServletContext {
 
 	@Override
 	public int getMajorVersion() {
-		return servletMajorVersion;
+		return Configuration.SERVLET_MAJOR_VERSION;
 	}
 
 	@Override
@@ -79,7 +78,7 @@ public class ServletContextImpl implements ServletContext {
 
 	@Override
 	public int getMinorVersion() {
-		return servletMinorVersion;
+		return Configuration.SERVLET_MINOR_VERSION;
 	}
 
 	@Override
@@ -120,7 +119,7 @@ public class ServletContextImpl implements ServletContext {
 
 	@Override
 	public String getServerInfo() {
-		return serverInfo;
+		return Configuration.SERVER_NAME;
 	}
 
 	@Override
@@ -131,7 +130,7 @@ public class ServletContextImpl implements ServletContext {
 
 	@Override
 	public String getServletContextName() {
-		return Configuration.appName;
+		return appConfig.getAppName();
 	}
 
 	@Override

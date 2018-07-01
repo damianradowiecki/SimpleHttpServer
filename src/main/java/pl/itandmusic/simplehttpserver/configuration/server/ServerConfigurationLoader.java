@@ -25,7 +25,7 @@ public class ServerConfigurationLoader {
 			Unmarshaller um = context.createUnmarshaller();
 			ServerConfig serverConfig = (ServerConfig) um.unmarshal(new FileReader(serverXml));
 			Configuration.port = serverConfig.getPort();
-			Configuration.appDirectory = serverConfig.getAppDirectory();
+			Configuration.appsDirectory = serverConfig.getAppsDirectory();
 		} else {
 			throw new FileNotFoundException("Cannot find server.xml file");
 		}
