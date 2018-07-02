@@ -1,6 +1,4 @@
-Jesli ktos uderza do aplikacji z adresem np. :
-localhost:1500/PiwoW1 to odsylasz mu przekierowanie do poprawnej wersji: loaclhost:1500/PiwoW1/
-dzięki temu nastepne zadania klienta beda zawieraly w sobie domene + nazwe aplikacji + ewentualna strone apliacji
+REFACTORING!!!
 
 Obsługa błędów - catch
 Przygotowanie wielu aplikacji serwletowych

@@ -43,4 +43,11 @@ public class URIResolverTest {
 		assertTrue(URIResolver.defaultAppPageRequest(requests.get(1)));
 		assertFalse(URIResolver.defaultAppPageRequest(requests.get(2)));
 	}
+	
+	@Test
+	public void testUnproperDeafultAppPageRequest() {
+		assertFalse(URIResolver.properDefaultAppPageRequest(requests.get(0)));
+		assertTrue(URIResolver.properDefaultAppPageRequest(requests.get(1)));
+		assertFalse(URIResolver.properDefaultAppPageRequest(requests.get(2)));
+	}
 }

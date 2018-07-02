@@ -1,19 +1,7 @@
 package pl.itandmusic.simplehttpserver.request;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -25,7 +13,9 @@ import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 import pl.itandmusic.simplehttpserver.model.HttpServletResponseImpl;
 import pl.itandmusic.simplehttpserver.model.RequestContent;
+import pl.itandmusic.simplehttpserver.response.ResponseSendingService;
 import pl.itandmusic.simplehttpserver.utils.URIResolver;
+import pl.itandmusic.simplehttpserver.utils.URIUtils;
 
 public class RequestThread implements Runnable {
 
@@ -35,38 +25,56 @@ public class RequestThread implements Runnable {
 	private HttpServletResponseImpl response;
 	private RequestContentReader requestContentReader;
 	private RequestContentConverter requestContentConverter;
+	private ResponseSendingService responseSendingService;
 	private AppConfig appConfig;
 
 	public RequestThread(Socket socket) {
 		this.socket = socket;
 		this.requestContentReader = new RequestContentReader();
 		this.requestContentConverter = new RequestContentConverter();
+		this.responseSendingService = new ResponseSendingService();
 	}
 
 	@Override
 	public void run() {
 
 		RequestContent content = requestContentReader.read(socket);
+		
 		if (content.empty()) {
 			return;
 		}
+		
 		request = requestContentConverter.convert(content, socket);
 		
 		if (URIResolver.serverInfoRequest(request)) {
-			tryToLoadServerPage();
-
-		} else {
-			if (loadAppConfig()) {
-				if (URIResolver.defaultAppPageRequest(request)) {
-					tryToLoadDefaultPage();
-				} else {
-					tryToSendResponse();
-				}
-			}
+			responseSendingService.tryToLoadServerPage(socket);
+		} 
+		else if(URIResolver.defaultAppPageRequest(request)) {
+			loadAppConfig();
+			loadAppDefaultPage();
+		}
+		else if(URIResolver.knownAppRequest(request)){
+			loadAppConfig();
+			tryToSendResponse();
+		}
+		else {
+			responseSendingService.tryToSendPageNotFoundResponse(socket);
 		}
 
 		tryToCloseSocket(socket);
 
+	}
+	
+	private void loadAppDefaultPage() {
+
+		if(URIResolver.properDefaultAppPageRequest(request)) {
+			responseSendingService.tryToLoadDefaultPage(socket, appConfig);
+		}
+		else {
+			String URI = URIResolver.getRequsetURI(request);
+			String correctedURI = URIUtils.correctUnproperDefaultPageURI(URI);
+			responseSendingService.tryToSendRedirectResponse(socket,  correctedURI);
+		}
 	}
 	
 	private void tryToSendResponse() {
@@ -79,14 +87,14 @@ public class RequestThread implements Runnable {
 			Servlet servlet = (Servlet) servletClass.newInstance();
 			servlet.service(request, response);
 			if (response.isRedirectResponse()) {
-				sendRedirectResponse(socket, response.getRedirectURL());
+				responseSendingService.sendRedirectResponse(socket, response.getRedirectURL());
 			} else {
-				sendResponse(socket, response);
+				responseSendingService.sendResponse(socket, response);
 			}
 
 		} catch (InstantiationException | IllegalAccessException | ServletException | IOException e) {
 			try {
-				sendInternalErrorResponse(socket);
+				responseSendingService.sendInternalErrorResponse(socket);
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -104,155 +112,20 @@ public class RequestThread implements Runnable {
 		}
 	}
 
-	private void sendResponse(Socket socket, HttpServletResponseImpl response) throws IOException {
-
-		OutputStream os = socket.getOutputStream();
-		PrintWriter writer = new PrintWriter(os);
-		// TODO why text is written using outputstream? Use Writer instead (it uses Unicode)
-		String mainHeader = "HTTP/1.1 200 OK";
-		String newLine = "\n";
-
-		writer.println(mainHeader);
-		
-		for (String headerName : response.getHeaders().keySet()) {
-			String header = headerName + " : " + response.getHeaders().get(headerName);
-			writer.println(header);
-		}
-
-		writer.println();
-
-		StringWriter stringWriter = response.getStringWriter();
-		StringBuffer stringBuffer = stringWriter.getBuffer();
-		
-		writer.print(stringBuffer);
-		
-		writer.close();
-
-	}
-
-	private void sendRedirectResponse(Socket socket, String redirectURL) throws IOException {
-		OutputStream os = socket.getOutputStream();
-
-		String mainHeader = "HTTP/1.1 302 Found";
-		String newLine = "\n";
-		String locationHeader = "Location" + " : " + redirectURL;
-
-		os.write(mainHeader.getBytes());
-		os.write(newLine.getBytes());
-		os.write(locationHeader.getBytes());
-		os.write(newLine.getBytes());
-
-		os.close();
-
-	}
-
-	private void sendInternalErrorResponse(Socket socket) throws IOException {
-		OutputStream os = socket.getOutputStream();
-
-		String error500Header = "HTTP/1.1 500 Internal Server Error";
-		String newLine = "\n";
-
-		os.write(error500Header.getBytes());
-		os.write(newLine.getBytes());
-
-		os.close();
-
-	}
-
-	private void tryToLoadDefaultPage() {
-		try {
-			loadDefaultPage();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	private void loadDefaultPage() throws IOException {
-		String appDirectory = appConfig.getAppPath();
-		Path path = Paths.get(appDirectory);
-		if (Files.exists(path)) {
-			for (String dp : appConfig.getDefaultPages()) {
-				Path page = Paths.get(dp);
-				Path fullPath = path.resolve(page);
-				if (Files.exists(fullPath)) {
-					BufferedReader reader = new BufferedReader(new FileReader(fullPath.toFile()));
-					OutputStream os = socket.getOutputStream();
-					PrintWriter writer = new PrintWriter(os);
-
-					writer.println("HTTP/1.1 200 OK");
-					writer.println("Content-Type: text/html");
-					writer.println();
-
-					String line;
-					while ((line = reader.readLine()) != null) {
-						writer.println(line);
-					}
-					writer.flush();
-					writer.close();
-
-					reader.close();
-
-					return;
-				}
-			}
-		}
-
-	}
-
-	private void tryToLoadServerPage() {
-		try {
-			loadServerPage();
-			;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	private void loadServerPage() throws IOException {
-
-		OutputStream os = socket.getOutputStream();
-		PrintWriter writer = new PrintWriter(os);
-
-		writer.println("HTTP/1.1 200 OK");
-		writer.println("Content-Type: text/html");
-		writer.println();
-		writer.println("<html>");
-		writer.println("<head>");
-		writer.println("<title>" + Configuration.SERVER_NAME + "</title>");
-		writer.println("</head>");
-		writer.println("<body>");
-		writer.println("Server is running on port " + Configuration.port);
-		writer.println("</body>");
-		writer.println("</html>");
-
-		writer.flush();
-		writer.close();
-
-		return;
-
-	}
+	
 
 	private Class<?> loadClass(HttpServletRequestImpl request) {
 		String requestURI = URIResolver.getRequsetURI(request);
 		return appConfig.getServletsMappings().get(requestURI);
 	}
 	
-	private boolean loadAppConfig() {
+	private void loadAppConfig() {
 		String requestURI = URIResolver.getRequsetURI(request);
-		
-		//TODO !!!!!
-		//TODO do przerobienia
-		//TODO !!!!!
 		for(String an : Configuration.applications.keySet()) {
 			if(requestURI.contains(an)) {
 				this.appConfig = Configuration.applications.get(an);
-				return true;
 			}
 		}
-		
-		return false;
 	}
 
 }
