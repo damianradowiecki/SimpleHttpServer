@@ -2,6 +2,8 @@ package pl.itandmusic.simplehttpserver.model;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -17,6 +19,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	private String contentType = "text/html";
 	private Map<String, String> headers = new HashMap<>();
 	private ResponseOutputStreamBuffer outputStreamBuffer = new ResponseOutputStreamBuffer();
+	private StringWriter writer = new StringWriter();
 	private boolean redirectResponse;
 	private String redirectURL;
 
@@ -58,10 +61,14 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	public ServletOutputStream getOutputStream() throws IOException {
 		return outputStreamBuffer;
 	}
+	
+	public StringWriter getStringWriter() {
+		return this.writer;
+	}
 
 	@Override
 	public PrintWriter getWriter() throws IOException {
-		return new PrintWriter(outputStreamBuffer);
+		return new PrintWriter(writer);
 	}
 
 	@Override

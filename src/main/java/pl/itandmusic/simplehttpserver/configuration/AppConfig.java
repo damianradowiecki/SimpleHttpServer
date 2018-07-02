@@ -8,6 +8,7 @@ public class AppConfig {
 	private Map<String, Class<?>> servletsMappings;
 	private List<String> defaultPages;
 	private String appName;
+	private String appPath;
 
 	public Map<String, Class<?>> getServletsMappings() {
 		return servletsMappings;
@@ -31,6 +32,14 @@ public class AppConfig {
 
 	public void setAppName(String appName) {
 		this.appName = appName;
+	}
+
+	public String getAppPath() {
+		return appPath;
+	}
+
+	public void setAppPath(String appPath) {
+		this.appPath = appPath;
 	}
 
 }

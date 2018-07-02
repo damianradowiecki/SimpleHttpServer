@@ -1,6 +1,15 @@
+Jesli ktos uderza do aplikacji z adresem np. :
+localhost:1500/PiwoW1 to odsylasz mu przekierowanie do poprawnej wersji: loaclhost:1500/PiwoW1/
+dzięki temu nastepne zadania klienta beda zawieraly w sobie domene + nazwe aplikacji + ewentualna strone apliacji
+
 Obsługa błędów - catch
 Przygotowanie wielu aplikacji serwletowych
 Obsługa uruchomienia wielu aplikacji (moze oddzielna pula watkow dla kazdej aplikacji??)
 Rozkład klas metod i pakietow
 O co chodzi z kodowaniem znakow
 Refaktoring - WebConfigurationLoader
+
+
+
+Na przyszłość
+chyba bedzie konieczne zaimplementowanie interfejsu Servlet (bo trzeba by jakos ustawiac parametry init-params)

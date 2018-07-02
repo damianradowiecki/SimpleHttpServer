@@ -5,15 +5,20 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import pl.itandmusic.simplehttpserver.configuration.AppConfig;
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
 import pl.itandmusic.simplehttpserver.configuration.web.WebConfigurationLoader;
 import pl.itandmusic.simplehttpserver.logger.Logger;
@@ -30,6 +35,7 @@ public class RequestThread implements Runnable {
 	private HttpServletResponseImpl response;
 	private RequestContentReader requestContentReader;
 	private RequestContentConverter requestContentConverter;
+	private AppConfig appConfig;
 
 	public RequestThread(Socket socket) {
 		this.socket = socket;
@@ -40,6 +46,12 @@ public class RequestThread implements Runnable {
 	@Override
 	public void run() {
 
+		RequestContent content = requestContentReader.read(socket);
+		if (content.empty()) {
+			return;
+		}
+		request = requestContentConverter.convert(content, socket);
+		
 		if (URIResolver.serverInfoRequest(request)) {
 			tryToLoadServerPage();
 
@@ -60,11 +72,7 @@ public class RequestThread implements Runnable {
 	private void tryToSendResponse() {
 		try {
 
-			RequestContent content = requestContentReader.read(socket);
-			if (content.empty()) {
-				return;
-			}
-			request = requestContentConverter.convert(content, socket);
+			
 			response = new HttpServletResponseImpl();
 
 			Class<?> servletClass = loadClass(request);
@@ -99,27 +107,26 @@ public class RequestThread implements Runnable {
 	private void sendResponse(Socket socket, HttpServletResponseImpl response) throws IOException {
 
 		OutputStream os = socket.getOutputStream();
-
+		PrintWriter writer = new PrintWriter(os);
+		// TODO why text is written using outputstream? Use Writer instead (it uses Unicode)
 		String mainHeader = "HTTP/1.1 200 OK";
 		String newLine = "\n";
 
-		os.write(mainHeader.getBytes());
-		os.write(newLine.getBytes());
+		writer.println(mainHeader);
+		
 		for (String headerName : response.getHeaders().keySet()) {
 			String header = headerName + " : " + response.getHeaders().get(headerName);
-			os.write(header.getBytes());
-			os.write(newLine.getBytes());
+			writer.println(header);
 		}
 
-		os.write(newLine.getBytes());
+		writer.println();
 
-		List<Integer> buffer = response.getOutputStreamBuffer().getBuffer();
-
-		for (int i : buffer) {
-			os.write(i);
-		}
-
-		os.close();
+		StringWriter stringWriter = response.getStringWriter();
+		StringBuffer stringBuffer = stringWriter.getBuffer();
+		
+		writer.print(stringBuffer);
+		
+		writer.close();
 
 	}
 
@@ -162,10 +169,10 @@ public class RequestThread implements Runnable {
 	}
 
 	private void loadDefaultPage() throws IOException {
-		String appDirectory = Configuration.appDirectory;
+		String appDirectory = appConfig.getAppPath();
 		Path path = Paths.get(appDirectory);
 		if (Files.exists(path)) {
-			for (String dp : Configuration.defaultPages) {
+			for (String dp : appConfig.getDefaultPages()) {
 				Path page = Paths.get(dp);
 				Path fullPath = path.resolve(page);
 				if (Files.exists(fullPath)) {
@@ -229,11 +236,23 @@ public class RequestThread implements Runnable {
 
 	private Class<?> loadClass(HttpServletRequestImpl request) {
 		String requestURI = URIResolver.getRequsetURI(request);
-		return Configuration.servletsMappings.get(requestURI);
+		return appConfig.getServletsMappings().get(requestURI);
 	}
 	
 	private boolean loadAppConfig() {
 		String requestURI = URIResolver.getRequsetURI(request);
+		
+		//TODO !!!!!
+		//TODO do przerobienia
+		//TODO !!!!!
+		for(String an : Configuration.applications.keySet()) {
+			if(requestURI.contains(an)) {
+				this.appConfig = Configuration.applications.get(an);
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 }
