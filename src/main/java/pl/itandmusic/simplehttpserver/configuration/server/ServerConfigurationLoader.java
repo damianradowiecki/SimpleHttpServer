@@ -31,7 +31,7 @@ public class ServerConfigurationLoader {
 				Configuration.appsDirectory = serverConfig.getAppsDirectory();
 			}
 		} else {
-			throw new FileNotFoundException("Cannot find server.xml file");
+			logger.error("Cannot find server.xml file. Should be in {rootDirectory}" + File.separator+"config directory.");
 		}
 
 		logger.info("Server configuration loaded.");
