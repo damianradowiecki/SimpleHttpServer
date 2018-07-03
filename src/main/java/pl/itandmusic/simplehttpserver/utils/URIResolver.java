@@ -48,7 +48,7 @@ public class URIResolver {
 		return request.getRequestURI().toString();
 	}
 
-	public static boolean knownAppRequest(HttpServletRequestImpl request) {
+	public static boolean anyAppRequest(HttpServletRequestImpl request) {
 		String requestURI = getRequsetURI(request);
 		for(AppConfig ac : Configuration.applications.values()) {
 			if(ac.getServletsMappings().keySet().contains(requestURI)) {

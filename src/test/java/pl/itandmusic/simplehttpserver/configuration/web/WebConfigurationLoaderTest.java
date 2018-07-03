@@ -1,7 +1,6 @@
 package pl.itandmusic.simplehttpserver.configuration.web;
 
-import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
+import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
 
@@ -13,7 +12,7 @@ public class WebConfigurationLoaderTest {
 	
 	
 	@Test
-	public void testWebConfigurationLoading() throws FileNotFoundException, MalformedURLException, ClassNotFoundException, JAXBException {
+	public void testWebConfigurationLoading() throws ClassNotFoundException, JAXBException, IOException {
 		ServerConfigurationLoader.load();
 		WebConfigurationLoader.load();
 	}

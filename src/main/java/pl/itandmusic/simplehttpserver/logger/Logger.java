@@ -35,6 +35,10 @@ public class Logger {
 		String className = clazz.getName();
 		System.out.println(date_ + "  " + logLevel_ + "  " + className + ": " + text);
 	}
+	
+	public void logException(Exception exception, LogLevel logLevel) {
+		log("Error message: " + exception.getMessage(), logLevel);
+	}
 
 	private String prepareDateString() {
 		return logDateFormat.format(Calendar.getInstance().getTime());

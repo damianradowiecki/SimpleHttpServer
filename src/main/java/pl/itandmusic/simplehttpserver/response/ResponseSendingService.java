@@ -13,12 +13,15 @@ import java.nio.file.Paths;
 
 import pl.itandmusic.simplehttpserver.configuration.AppConfig;
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
+import pl.itandmusic.simplehttpserver.logger.LogLevel;
+import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.HttpServletResponseImpl;
 
-//TODO change name of class and methods
 public class ResponseSendingService {
 
-	public void sendResponse(Socket socket, HttpServletResponseImpl response) throws IOException {
+	private final Logger logger = Logger.getLogger(ResponseSendingService.class);
+
+	public void sendOKResponse(Socket socket, HttpServletResponseImpl response) throws IOException {
 
 		OutputStream os = socket.getOutputStream();
 		PrintWriter writer = new PrintWriter(os);
@@ -46,7 +49,8 @@ public class ResponseSendingService {
 		try {
 			sendRedirectResponse(socket, redirectURL);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			logger.warn("Could not send redirect response to " + redirectURL);
+			logger.logException(e, LogLevel.WARN);
 			e.printStackTrace();
 		}
 	}
@@ -67,6 +71,15 @@ public class ResponseSendingService {
 
 	}
 
+	public void tryToSendInternalErrorResponse(Socket socket) {
+		try {
+			sendInternalErrorResponse(socket);
+		} catch (IOException e) {
+			logger.warn("Could not send internal error response.");
+			logger.logException(e, LogLevel.WARN);
+		}
+	}
+
 	public void sendInternalErrorResponse(Socket socket) throws IOException {
 		OutputStream os = socket.getOutputStream();
 
@@ -84,8 +97,8 @@ public class ResponseSendingService {
 		try {
 			sendPageNotFoundResponse(socket);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn("Could not send page not found response");
+			logger.logException(e, LogLevel.WARN);
 		}
 	}
 
@@ -105,8 +118,8 @@ public class ResponseSendingService {
 		try {
 			loadDefaultPage(socket, appConfig);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn("Could not load default page");
+			logger.logException(e, LogLevel.WARN);
 		}
 	}
 
@@ -147,8 +160,8 @@ public class ResponseSendingService {
 			loadServerPage(socket);
 			;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn("Could not load server page");
+			logger.logException(e, LogLevel.WARN);
 		}
 	}
 

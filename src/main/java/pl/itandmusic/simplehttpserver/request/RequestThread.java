@@ -8,7 +8,6 @@ import javax.servlet.ServletException;
 
 import pl.itandmusic.simplehttpserver.configuration.AppConfig;
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
-import pl.itandmusic.simplehttpserver.configuration.web.WebConfigurationLoader;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 import pl.itandmusic.simplehttpserver.model.HttpServletResponseImpl;
@@ -19,10 +18,10 @@ import pl.itandmusic.simplehttpserver.utils.URIUtils;
 
 public class RequestThread implements Runnable {
 
-	private static final Logger logger = Logger.getLogger(WebConfigurationLoader.class);
+	private final Logger logger = Logger.getLogger(RequestThread.class);
 	private Socket socket;
-	private HttpServletRequestImpl request;
-	private HttpServletResponseImpl response;
+	private HttpServletRequestImpl servletRequest;
+	private HttpServletResponseImpl servletResponse;
 	private RequestContentReader requestContentReader;
 	private RequestContentConverter requestContentConverter;
 	private ResponseSendingService responseSendingService;
@@ -44,18 +43,18 @@ public class RequestThread implements Runnable {
 			return;
 		}
 		
-		request = requestContentConverter.convert(content, socket);
+		servletRequest = requestContentConverter.convert(content, socket);
 		
-		if (URIResolver.serverInfoRequest(request)) {
+		if (URIResolver.serverInfoRequest(servletRequest)) {
 			responseSendingService.tryToLoadServerPage(socket);
 		} 
-		else if(URIResolver.defaultAppPageRequest(request)) {
+		else if(URIResolver.defaultAppPageRequest(servletRequest)) {
 			loadAppConfig();
 			loadAppDefaultPage();
 		}
-		else if(URIResolver.knownAppRequest(request)){
+		else if(URIResolver.anyAppRequest(servletRequest)){
 			loadAppConfig();
-			tryToSendResponse();
+			tryToServiceRequestUsingServlet();
 		}
 		else {
 			responseSendingService.tryToSendPageNotFoundResponse(socket);
@@ -67,39 +66,38 @@ public class RequestThread implements Runnable {
 	
 	private void loadAppDefaultPage() {
 
-		if(URIResolver.properDefaultAppPageRequest(request)) {
+		if(URIResolver.properDefaultAppPageRequest(servletRequest)) {
 			responseSendingService.tryToLoadDefaultPage(socket, appConfig);
 		}
 		else {
-			String URI = URIResolver.getRequsetURI(request);
+			String URI = URIResolver.getRequsetURI(servletRequest);
 			String correctedURI = URIUtils.correctUnproperDefaultPageURI(URI);
 			responseSendingService.tryToSendRedirectResponse(socket,  correctedURI);
 		}
 	}
 	
-	private void tryToSendResponse() {
+	private void tryToServiceRequestUsingServlet() {
 		try {
-
+			servletResponse = new HttpServletResponseImpl();
 			
-			response = new HttpServletResponseImpl();
-
-			Class<?> servletClass = loadClass(request);
+			Class<?> servletClass = loadClass(servletRequest);
+			
 			Servlet servlet = (Servlet) servletClass.newInstance();
-			servlet.service(request, response);
-			if (response.isRedirectResponse()) {
-				responseSendingService.sendRedirectResponse(socket, response.getRedirectURL());
+			
+			servlet.service(servletRequest, servletResponse);
+			
+			if (servletResponse.isRedirectResponse()) {
+				responseSendingService.sendRedirectResponse(socket, servletResponse.getRedirectURL());
 			} else {
-				responseSendingService.sendResponse(socket, response);
+				responseSendingService.sendOKResponse(socket, servletResponse);
 			}
 
 		} catch (InstantiationException | IllegalAccessException | ServletException | IOException e) {
-			try {
-				responseSendingService.sendInternalErrorResponse(socket);
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			e.printStackTrace();
+			
+			logger.error("Could not ...");
+			logger.error("Error message: " + e.getMessage());
+			
+			responseSendingService.tryToSendInternalErrorResponse(socket);
 		}
 	}
 
@@ -107,8 +105,7 @@ public class RequestThread implements Runnable {
 		try {
 			socket.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn("Conuld not close socket");
 		}
 	}
 
@@ -120,7 +117,7 @@ public class RequestThread implements Runnable {
 	}
 	
 	private void loadAppConfig() {
-		String requestURI = URIResolver.getRequsetURI(request);
+		String requestURI = URIResolver.getRequsetURI(servletRequest);
 		for(String an : Configuration.applications.keySet()) {
 			if(requestURI.contains(an)) {
 				this.appConfig = Configuration.applications.get(an);

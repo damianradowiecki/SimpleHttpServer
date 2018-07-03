@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -28,59 +27,75 @@ import pl.itandmusic.simplehttpserver.logger.Logger;
 public class WebConfigurationLoader {
 
 	private static final Logger logger = Logger.getLogger(WebConfigurationLoader.class);
+	private static List<String> appFolderNames = new ArrayList<>();
 
-	public static void load() {
+	public static void load() throws IOException, ClassNotFoundException, JAXBException {
 
 		logger.info("Web configuration loading.");
 
-		List<String> folderNames = new ArrayList<>();
+		loadAppFolderNames();
 
-		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(Configuration.appsDirectory))) {
-			for (Path path : directoryStream) {
-				if (Files.isDirectory(path)) {
-					String folderName = path.getFileName().toString();
-					folderNames.add(folderName);
-				}
-			}
-		} catch (IOException ex) {
-			// TODO warn about appsDirectory unproper value
-		}
-
-		try {
-			for (String fn : folderNames) {
-				AppConfig appConfig = new AppConfig();
-				loadAppConfig(fn, appConfig);
-				Configuration.applications.put(appConfig.getAppName(), appConfig);
-			}
-
-		} catch (MalformedURLException | ClassNotFoundException | FileNotFoundException | JAXBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		loadAppConfigurations();
 
 		logger.info("Web configuration loaded.");
 
 	}
 
-	//TODO refactoring
+	private static void loadAppFolderNames() throws IOException {
+		DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(Configuration.appsDirectory));
+		for (Path path : directoryStream) {
+			if (Files.isDirectory(path)) {
+				String folderName = path.getFileName().toString();
+				appFolderNames.add(folderName);
+			}
+		}
+
+	}
+
+	private static void loadAppConfigurations()
+			throws MalformedURLException, ClassNotFoundException, FileNotFoundException, JAXBException {
+
+		for (String fn : appFolderNames) {
+			loadAppConfiguration(fn);
+		}
+
+	}
+
+	private static void loadAppConfiguration(String appFolderName)
+			throws MalformedURLException, ClassNotFoundException, FileNotFoundException, JAXBException {
+		AppConfig appConfig = new AppConfig();
+		loadAppConfig(appFolderName, appConfig);
+		Configuration.applications.put(appConfig.getAppName(), appConfig);
+
+	}
+
 	private static void loadAppConfig(String appFolder, AppConfig appConfig)
 			throws MalformedURLException, ClassNotFoundException, FileNotFoundException, JAXBException {
 		File webXml = new File(Configuration.appsDirectory + "/" + appFolder + "/WEB-INF/web.xml");
 		if (webXml.exists()) {
-			JAXBContext context = JAXBContext.newInstance(WebApp.class);
-			Unmarshaller um = context.createUnmarshaller();
-			WebApp webApp = (WebApp) um.unmarshal(new FileReader(webXml));
-			String appName = webApp.getDisplayName() != null ? webApp.getDisplayName() : appFolder;
-			appConfig.setAppName(appName);
-			loadServletMappings(appFolder, appName, webApp, appConfig);
-			appConfig.setDefaultPages(webApp.getWelcomeFiles());
-			
-			appConfig.setAppPath(Configuration.appsDirectory + "/" + appFolder);
+			WebApp webApp = unmarshalWebXml(webXml);
+			fillAppConfig(appConfig, appFolder, webApp);
 		} else {
 			throw new FileNotFoundException("Cannot find web.xml file");
 		}
 	}
 
+	private static WebApp unmarshalWebXml(File webXml) throws JAXBException, FileNotFoundException {
+		JAXBContext context = JAXBContext.newInstance(WebApp.class);
+		Unmarshaller um = context.createUnmarshaller();
+		return (WebApp) um.unmarshal(new FileReader(webXml));
+	}
+
+	private static void fillAppConfig(AppConfig appConfig, String appFolder, WebApp webApp)
+			throws MalformedURLException, ClassNotFoundException {
+		String appName = webApp.getDisplayName() != null ? webApp.getDisplayName() : appFolder;
+		appConfig.setAppName(appName);
+		loadServletMappings(appFolder, appName, webApp, appConfig);
+		appConfig.setDefaultPages(webApp.getWelcomeFiles());
+		appConfig.setAppPath(Configuration.appsDirectory + "/" + appFolder);
+	}
+
+	@SuppressWarnings("resource")
 	private static void loadServletMappings(String appFolder, String appName, WebApp webApp, AppConfig appConfig)
 			throws MalformedURLException, ClassNotFoundException {
 		String servletName = webApp.getServlet().getServletName();
@@ -89,6 +104,7 @@ public class WebConfigurationLoader {
 		URL classes = new File(Configuration.appsDirectory + "/" + appFolder + "/WEB-INF/classes").toURI().toURL();
 		URL[] urls = new URL[] { classes };
 
+		
 		ClassLoader classLoader = new URLClassLoader(urls);
 
 		Class<?> clazz = classLoader.loadClass(servletClassName);

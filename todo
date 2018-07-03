@@ -1,6 +1,5 @@
-REFACTORING!!!
+Brakujace testy
 
-Obsługa błędów - catch
 Przygotowanie wielu aplikacji serwletowych
 Obsługa uruchomienia wielu aplikacji (moze oddzielna pula watkow dla kazdej aplikacji??)
 Rozkład klas metod i pakietow
