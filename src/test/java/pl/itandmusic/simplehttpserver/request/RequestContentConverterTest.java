@@ -145,4 +145,6 @@ public class RequestContentConverterTest {
 		assertTrue(POSTParams.containsKey("smak"));
 		assertEquals("slodkawy", POSTParams.get("smak"));
 	}
+	
+	//TODO not every method is tested
 }
