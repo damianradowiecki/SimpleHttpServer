@@ -1,6 +1,7 @@
 package pl.itandmusic.simplehttpserver.request;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -15,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import pl.itandmusic.simplehttpserver.model.HeaderValues;
+import pl.itandmusic.simplehttpserver.model.HttpMethod;
 import pl.itandmusic.simplehttpserver.model.RequestContent;
 
 public class RequestContentConverterTest {
@@ -34,7 +36,7 @@ public class RequestContentConverterTest {
 	@Before
 	public void prepareContent() {
 		content_1 = new ArrayList<>();
-		content_1.add("GET /test/test.do?test=test&test=wew HTTP/1.1");
+		content_1.add("GET /test/test.do?test=test&test2=wew HTTP/1.1");
 		content_1.add("Host: wickedlysmart.com");
 		content_1.add("Accept-Language: en-us, en;q=0.5");
 		content_1.add("Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7");
@@ -86,9 +88,11 @@ public class RequestContentConverterTest {
 	@Test
 	public void testQueryStringExtracting() {
 		String queryString = requestContentConverter.extractQueryString(content_1);
-		assertEquals("/test/test.do?test=test&test=wew", queryString);
+		assertEquals("/test/test.do?test=test&test2=wew", queryString);
+		assertNotEquals("test", queryString);
 		queryString = requestContentConverter.extractQueryString(content_2);
 		assertEquals("/any/resource/on/server/test", queryString);
+		assertNotEquals("/any/resource/on/server/", queryString);
 	}
 	
 	@Test
@@ -121,6 +125,7 @@ public class RequestContentConverterTest {
 		}
 	}
 	
+	@Test
 	public void testHeaderNamesExtracting() {
 		Enumeration<String> headerNames = requestContentConverter.extractHeaderNames(content_1);
 		
@@ -137,7 +142,7 @@ public class RequestContentConverterTest {
 		
 	}
 	
-	
+	@Test
 	public void testPOSTParametersExtracting() {
 		Map<String, String> POSTParams = requestContentConverter.extractParameters(POSTData);
 		assertTrue(POSTParams.containsKey("kolor"));
@@ -146,5 +151,28 @@ public class RequestContentConverterTest {
 		assertEquals("slodkawy", POSTParams.get("smak"));
 	}
 	
-	//TODO not every method is tested
+	@Test
+	public void testHttpMethodExtracting() {
+		HttpMethod method_1 = requestContentConverter.extractHttpMethod(content_1);
+		assertEquals(HttpMethod.GET, method_1);
+		HttpMethod method_2 = requestContentConverter.extractHttpMethod(content_2);
+		assertEquals(HttpMethod.POST, method_2);
+	}
+	
+	@Test
+	public void testParametersExtracting() {
+		Map<String, String> content_1Params = requestContentConverter.extractParameters(getRequestContent, HttpMethod.GET);
+		assertTrue(content_1Params.containsKey("test"));
+		assertTrue(content_1Params.get("test").equals("test"));
+		assertTrue(content_1Params.containsKey("test2"));
+		assertTrue(content_1Params.get("test2").equals("wew"));
+		assertTrue(!content_1Params.containsKey("wew"));
+		Map<String, String> content_2Params = requestContentConverter.extractParameters(postRequestContent, HttpMethod.POST);
+		assertTrue(content_2Params.containsKey("kolor"));
+		assertTrue(content_2Params.get("kolor").equals("ciemny"));
+		assertTrue(content_2Params.containsKey("smak"));
+		assertTrue(content_2Params.get("smak").equals("slodkawy"));
+		assertTrue(!content_1Params.containsKey("slodkawy"));
+	}
+
 }

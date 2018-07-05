@@ -145,7 +145,7 @@ public class RequestContentConverter {
 		
 		List<String> names = new ArrayList<>();
 		
-		pattern = Pattern.compile("(?<NAME>.+?):(.+?,.+?)*");
+		pattern = Pattern.compile("(?<NAME>.+?):(.+?,?)*");
 
 		for (String s : content) {
 			matcher = pattern.matcher(s);
@@ -175,12 +175,20 @@ public class RequestContentConverter {
 	
 	Map<String, String> extractParameters(List<String> content) {
 		Map<String, String> result = new HashMap<>();
+		String requestFirstLine = content.get(0);
+		pattern = Pattern.compile("^.*?\\?(?<PARAMS>.*?)\\s.*$");
+		matcher = pattern.matcher(requestFirstLine);
+		if(matcher.matches()) {
+			String paramsInOneString = matcher.group("PARAMS").trim();
+			Map<String, String> params = extractParameters(paramsInOneString);
+			result.putAll(params);
+		}
 		return result;
 	}
 	
-	Map<String, String> extractParameters(String postData) {
+	Map<String, String> extractParameters(String oneStringData) {
 		Map<String, String> result = new HashMap<>();
-		String [] params = postData.split(PARAMS_DELIMITER);
+		String [] params = oneStringData.split(PARAMS_DELIMITER);
 		for(String p : params) {
 			String [] keyValuePairs = p.split(KEY_VALUE_DELIMITER);
 			String key = keyValuePairs[0].trim();
