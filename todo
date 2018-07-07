@@ -1,12 +1,13 @@
-Brakujace testy
+zaimplementowanie servletconfig i servletcontext
+	- servletcontext mozna pobrac z zadania (wrzucic trzeba to do zadania) i z obiektu servletconfig (tez tam wrzucic trzeba)
+	- servletconfig trzeba wrzucic do metody init servletu
 
-Przygotowanie wielu aplikacji serwletowych
+
 Obsługa uruchomienia wielu aplikacji (moze oddzielna pula watkow dla kazdej aplikacji??)
 Rozkład klas metod i pakietow
+
+
+Przygotowanie wielu aplikacji serwletowych
 O co chodzi z kodowaniem znakow
-Refaktoring - WebConfigurationLoader
-Budowanie pliku jar
+Budowanie pliku jar razem z dependency
 
-
-Na przyszłość
-chyba bedzie konieczne zaimplementowanie interfejsu Servlet (bo trzeba by jakos ustawiac parametry init-params)

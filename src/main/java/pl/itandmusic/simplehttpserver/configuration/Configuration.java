@@ -3,9 +3,11 @@ package pl.itandmusic.simplehttpserver.configuration;
 import java.util.HashMap;
 import java.util.Map;
 
+import pl.itandmusic.simplehttpserver.model.ServletContext;
+
 public class Configuration {
 	
-	public final static Map<String, AppConfig> applications = new HashMap<>();
+	public final static Map<String, ServletContext> applications = new HashMap<>();
 	public final static String SERVER_NAME = "Mini HTTP Server (has servlets compability)";
 	public static int port;
 	public static String appsDirectory;

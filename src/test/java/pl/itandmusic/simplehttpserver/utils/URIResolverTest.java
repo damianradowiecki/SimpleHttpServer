@@ -14,8 +14,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import pl.itandmusic.simplehttpserver.configuration.AppConfig;
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
+import pl.itandmusic.simplehttpserver.model.ServletContext;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 
 public class URIResolverTest {
@@ -23,8 +23,8 @@ public class URIResolverTest {
 	private static List<HttpServletRequestImpl> requests;
 	private static Map<String, Class<?>> servletMappings_1;
 	private static Map<String, Class<?>> servletMappings_2;
-	private static AppConfig appConfig_1;
-	private static AppConfig appConfig_2;
+	private static ServletContext appConfig_1;
+	private static ServletContext appConfig_2;
 
 	
 	@BeforeClass
@@ -32,8 +32,8 @@ public class URIResolverTest {
 		requests = new ArrayList<>();
 		servletMappings_1 = new HashMap<>();
 		servletMappings_2 = new HashMap<>();
-		appConfig_1 = new AppConfig();
-		appConfig_2 = new AppConfig();
+		appConfig_1 = new ServletContext();
+		appConfig_2 = new ServletContext();
 	}
 	
 	@Before

@@ -3,8 +3,8 @@ package pl.itandmusic.simplehttpserver.utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import pl.itandmusic.simplehttpserver.configuration.AppConfig;
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
+import pl.itandmusic.simplehttpserver.model.ServletContext;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 
 public class URIResolver {
@@ -50,8 +50,8 @@ public class URIResolver {
 
 	public static boolean anyAppRequest(HttpServletRequestImpl request) {
 		String requestURI = getRequsetURI(request);
-		for(AppConfig ac : Configuration.applications.values()) {
-			if(ac.getServletsMappings().keySet().contains(requestURI)) {
+		for(ServletContext sc : Configuration.applications.values()) {
+			if(sc.getServletsMappings().keySet().contains(requestURI)) {
 				return true;
 			}
 		}

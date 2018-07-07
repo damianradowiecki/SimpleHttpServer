@@ -11,10 +11,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import pl.itandmusic.simplehttpserver.configuration.AppConfig;
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
 import pl.itandmusic.simplehttpserver.logger.LogLevel;
 import pl.itandmusic.simplehttpserver.logger.Logger;
+import pl.itandmusic.simplehttpserver.model.ServletContext;
 import pl.itandmusic.simplehttpserver.model.HttpServletResponseImpl;
 
 public class ResponseSendingService {
@@ -114,20 +114,20 @@ public class ResponseSendingService {
 		os.close();
 	}
 
-	public void tryToLoadDefaultPage(Socket socket, AppConfig appConfig) {
+	public void tryToLoadDefaultPage(Socket socket, ServletContext servletContext) {
 		try {
-			loadDefaultPage(socket, appConfig);
+			loadDefaultPage(socket, servletContext);
 		} catch (IOException e) {
 			logger.warn("Could not load default page");
 			logger.logException(e, LogLevel.WARN);
 		}
 	}
 
-	public void loadDefaultPage(Socket socket, AppConfig appConfig) throws IOException {
-		String appDirectory = appConfig.getAppPath();
+	public void loadDefaultPage(Socket socket, ServletContext servletContext) throws IOException {
+		String appDirectory = servletContext.getAppPath();
 		Path path = Paths.get(appDirectory);
 		if (Files.exists(path)) {
-			for (String dp : appConfig.getDefaultPages()) {
+			for (String dp : servletContext.getDefaultPages()) {
 				Path page = Paths.get(dp);
 				Path fullPath = path.resolve(page);
 				if (Files.exists(fullPath)) {

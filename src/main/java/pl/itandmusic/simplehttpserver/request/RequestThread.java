@@ -6,9 +6,9 @@ import java.net.Socket;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
-import pl.itandmusic.simplehttpserver.configuration.AppConfig;
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
 import pl.itandmusic.simplehttpserver.logger.Logger;
+import pl.itandmusic.simplehttpserver.model.ServletContext;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 import pl.itandmusic.simplehttpserver.model.HttpServletResponseImpl;
 import pl.itandmusic.simplehttpserver.model.RequestContent;
@@ -25,7 +25,7 @@ public class RequestThread implements Runnable {
 	private RequestContentReader requestContentReader;
 	private RequestContentConverter requestContentConverter;
 	private ResponseSendingService responseSendingService;
-	private AppConfig appConfig;
+	private ServletContext servletContext;
 
 	public RequestThread(Socket socket) {
 		this.socket = socket;
@@ -67,7 +67,7 @@ public class RequestThread implements Runnable {
 	private void loadAppDefaultPage() {
 
 		if(URIResolver.properDefaultAppPageRequest(servletRequest)) {
-			responseSendingService.tryToLoadDefaultPage(socket, appConfig);
+			responseSendingService.tryToLoadDefaultPage(socket, servletContext);
 		}
 		else {
 			String URI = URIResolver.getRequsetURI(servletRequest);
@@ -113,14 +113,14 @@ public class RequestThread implements Runnable {
 
 	private Class<?> loadClass(HttpServletRequestImpl request) {
 		String requestURI = URIResolver.getRequsetURI(request);
-		return appConfig.getServletsMappings().get(requestURI);
+		return servletContext.getServletsMappings().get(requestURI);
 	}
 	
 	private void loadAppConfig() {
 		String requestURI = URIResolver.getRequsetURI(servletRequest);
 		for(String an : Configuration.applications.keySet()) {
 			if(requestURI.contains(an)) {
-				this.appConfig = Configuration.applications.get(an);
+				this.servletContext = Configuration.applications.get(an);
 			}
 		}
 	}
