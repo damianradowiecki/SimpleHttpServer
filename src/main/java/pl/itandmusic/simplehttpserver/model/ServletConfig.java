@@ -4,34 +4,37 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 
 public class ServletConfig implements javax.servlet.ServletConfig {
 
-	private Map<String, Class<? extends Servlet>> servletMappings = new HashMap<>();
-	private Map<String, ? extends Servlet> servlets = new HashMap<>();
+	private String servletName;
+	private String servletClass;
+	private Map<String, Class<?>> servletMappings = new HashMap<>();
 
-	public Map<String, Class<? extends Servlet>> getServletMappings() {
+	public String getServletClass() {
+		return servletClass;
+	}
+
+	public void setServletClass(String servletClass) {
+		this.servletClass = servletClass;
+	}
+
+	public Map<String, Class<?>> getServletMappings() {
 		return servletMappings;
 	}
 
-	public void setServletMappings(Map<String, Class<? extends Servlet>> servletMappings) {
+	public void setServletMappings(Map<String, Class<?>> servletMappings) {
 		this.servletMappings = servletMappings;
 	}
 
-	public Map<String, ? extends Servlet> getServlets() {
-		return servlets;
-	}
-
-	public void setServlets(Map<String, ? extends Servlet> servlets) {
-		this.servlets = servlets;
+	public void setServletName(String servletName) {
+		this.servletName = servletName;
 	}
 
 	@Override
 	public String getServletName() {
-		// TODO Auto-generated method stub
-		return null;
+		return servletName;
 	}
 
 	@Override

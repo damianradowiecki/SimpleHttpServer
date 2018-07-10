@@ -19,9 +19,12 @@ class WebApp {
 	@XmlElement(name = "display-name")
 	private String displayName;
 	@XmlElement(name = "servlet")
-	private Servlet servlet;
+	private List<Servlet> servlets;
 	@XmlElement(name = "servlet-mapping")
-	private ServletMapping servletMapping;
+	private List<ServletMapping> servletMappings;
+
+	@XmlElement(name = "context-param")
+	private List<ContextParam> contextParams;
 
 	@XmlElementWrapper(name = "welcome-file-list")
 	@XmlElement(name = "welcome-file")
@@ -43,20 +46,20 @@ class WebApp {
 		this.welcomeFiles = welcomeFiles;
 	}
 
-	public Servlet getServlet() {
-		return servlet;
+	public List<Servlet> getServlets() {
+		return servlets;
 	}
 
-	public void setServlet(Servlet servlet) {
-		this.servlet = servlet;
+	public void setServlets(List<Servlet> servlets) {
+		this.servlets = servlets;
 	}
 
-	public ServletMapping getServletMapping() {
-		return servletMapping;
+	public List<ServletMapping> getServletMappings() {
+		return servletMappings;
 	}
 
-	public void setServletMapping(ServletMapping servletMapping) {
-		this.servletMapping = servletMapping;
+	public void setServletMappings(List<ServletMapping> servletMappings) {
+		this.servletMappings = servletMappings;
 	}
 
 	public String getId() {
@@ -73,6 +76,14 @@ class WebApp {
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	public List<ContextParam> getContextParams() {
+		return contextParams;
+	}
+
+	public void setContextParams(List<ContextParam> contextParams) {
+		this.contextParams = contextParams;
 	}
 
 }

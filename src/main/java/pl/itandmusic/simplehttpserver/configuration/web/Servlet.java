@@ -1,5 +1,7 @@
 package pl.itandmusic.simplehttpserver.configuration.web;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -8,6 +10,7 @@ public class Servlet {
 
 	private String servletName;
 	private String servletClass;
+	private List<InitParam> initParams;
 
 	@XmlElement(name = "servlet-name")
 	public String getServletName() {
@@ -26,5 +29,16 @@ public class Servlet {
 	public void setServletClass(String servletClass) {
 		this.servletClass = servletClass;
 	}
+
+	@XmlElement(name = "init-param")
+	public List<InitParam> getInitParams() {
+		return initParams;
+	}
+
+	public void setInitParams(List<InitParam> initParams) {
+		this.initParams = initParams;
+	}
+	
+	
 
 }

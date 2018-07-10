@@ -34,15 +34,15 @@ public class WebConfigurationLoader {
 
 		logger.info("Web configuration loading.");
 
-		loadAppFolderNames();
+		loadAllAppFolderNames();
 
-		loadAppConfigurations();
+		loadConfigurationForEveryApp();
 
 		logger.info("Web configuration loaded.");
 
 	}
 
-	private static void loadAppFolderNames() throws IOException {
+	private static void loadAllAppFolderNames() throws IOException {
 		DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(Configuration.appsDirectory));
 		for (Path path : directoryStream) {
 			if (Files.isDirectory(path)) {
@@ -53,7 +53,7 @@ public class WebConfigurationLoader {
 
 	}
 
-	private static void loadAppConfigurations()
+	private static void loadConfigurationForEveryApp()
 			throws MalformedURLException, ClassNotFoundException, FileNotFoundException, JAXBException {
 
 		for (String fn : appFolderNames) {
@@ -62,20 +62,32 @@ public class WebConfigurationLoader {
 
 	}
 
-	private static void loadAppConfiguration(String appFolderName)
-			throws MalformedURLException, ClassNotFoundException, FileNotFoundException, JAXBException {
+	private static void loadAppConfiguration(String appFolderName){
+		
 		ServletContext servletContext = new ServletContext();
-		loadAppsConfig(appFolderName, servletContext);
+		
+		WebApp webApp = unmarshalWebXml(appFolderName);
+		
+		setAppName(servletContext, webApp, appFolderName);
+
+		setDefaultAppPages(servletContext, webApp);
+
+		setContextParams(servletContext, webApp);
+
+		setServlets(servletContext, webApp);
+		
+		setServletMappings(servletContext, webApp);
+		
+		
 		Configuration.applications.put(servletContext.getServletContextName(), servletContext);
 
 	}
 
-	private static void loadAppsConfig(String appFolder, ServletContext servletContext)
+	private static WebApp unmarshalWebXml(String appFolder)
 			throws MalformedURLException, ClassNotFoundException, FileNotFoundException, JAXBException {
 		File webXml = new File(Configuration.appsDirectory + "/" + appFolder + "/WEB-INF/web.xml");
 		if (webXml.exists()) {
-			WebApp webApp = unmarshalWebXml(webXml);
-			fillAppsConfig(servletContext, appFolder, webApp);
+			return unmarshalWebXml(webXml);
 		} else {
 			throw new FileNotFoundException("Cannot find web.xml file");
 		}
@@ -86,40 +98,53 @@ public class WebConfigurationLoader {
 		Unmarshaller um = context.createUnmarshaller();
 		return (WebApp) um.unmarshal(new FileReader(webXml));
 	}
-
-	private static void fillAppsConfig(ServletContext servletContext, String appFolder, WebApp webApp)
-			throws MalformedURLException, ClassNotFoundException {
-		String appName = webApp.getDisplayName() != null ? webApp.getDisplayName() : appFolder;
+	
+	private static void setAppName(ServletContext servletContext, WebApp webApp, String folderName) {
+		String appName = webApp.getDisplayName() != null ? webApp.getDisplayName() : folderName;
 		servletContext.setServletContextName(appName);
+	}
+	
+	private static void setDefaultAppPages(ServletContext servletContext, WebApp webApp) {
 		servletContext.setDefaultPages(webApp.getWelcomeFiles());
-		servletContext.setAppPath(Configuration.appsDirectory + "/" + appFolder);
-		ServletConfig servletConfig = new ServletConfig();
-		loadServletMappings(appFolder, appName, webApp, servletConfig);
-		servletContext.getServletConfigs().add(servletConfig);
 	}
-
-	@SuppressWarnings({ "resource", "unchecked" })
-	private static void loadServletMappings(String appFolder, String appName, WebApp webApp, ServletConfig servletConfig)
-			throws MalformedURLException, ClassNotFoundException {
-		String servletName = webApp.getServlet().getServletName();
-		String servletClassName = webApp.getServlet().getServletClass();
-
-		URL classes = new File(Configuration.appsDirectory + "/" + appFolder + "/WEB-INF/classes").toURI().toURL();
-		URL[] urls = new URL[] { classes };
-
-		
-		ClassLoader classLoader = new URLClassLoader(urls);
-
-		Class<? extends javax.servlet.Servlet> clazz = (Class<? extends javax.servlet.Servlet>) classLoader.loadClass(servletClassName);
-
-		Map<String, Class<? extends javax.servlet.Servlet>> servletsMappings = new HashMap<>();
-
-		if (webApp.getServletMapping().getServletName().equals(servletName)) {
-			servletsMappings.put("/" + appName + webApp.getServletMapping().getUrlPattern(), clazz);
+	
+	private static void setContextParams(ServletContext servletContext, WebApp webApp) {
+		for(ContextParam cp : webApp.getContextParams()) {
+			servletContext.setAttribute(cp.getName(), cp.getValue());
 		}
-
-		servletConfig.setServletMappings(servletsMappings);
-
 	}
+	
+	private static void setServlets(ServletContext servletContext, WebApp webApp) {
+		for(Servlet s : webApp.getServlets()) {
+			ServletConfig servletConfig = new ServletConfig();
+			servletConfig.setServletName(s.getServletName());
+			servletConfig.setServletClass(s.getServletClass());
+			servletContext.getServletConfigs().add(servletConfig);
+		}
+		
+	}
+	
+	private static void setServletMappings(ServletContext servletContext, WebApp webApp) {
+		for(ServletConfig sc : servletContext.getServletConfigs()) {
+			for(ServletMapping sm : webApp.getServletMappings()) {
+				if(sm.getServletName().equals(sc.getServletName())) {
+					Class<?> clazz = getClassForUrlPattern(sm.getUrlPattern());
+					sc.getServletMappings().put(sm.getServletName(), clazz);
+				}
+			}
+		}
+	}
+	
+	private static Class<?> getClassForUrlPattern(String urlPattern){
+		try {
+			return Class.forName(urlPattern);
+		} catch (ClassNotFoundException e) {
+			//TODO cos z tym trzeba zrobic
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	
 
 }

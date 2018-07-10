@@ -9,9 +9,17 @@
     <welcome-file>default.htm</welcome-file>
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
+  <context-param>
+  	<param-name>tset</param-name>
+    <param-value>tttt</param-value>
+  </context-param>
   <servlet>
     <servlet-name>chooseBeer</servlet-name>
     <servlet-class>com.example.web.BeerChooser</servlet-class>
+    <init-param>
+    	<param-name>test</param-name>
+    	<param-value>tttt</param-value>
+    </init-param>
   </servlet>
   <servlet-mapping>
   	<servlet-name>chooseBeer</servlet-name>
