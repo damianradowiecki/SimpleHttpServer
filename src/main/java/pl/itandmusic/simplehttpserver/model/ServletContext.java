@@ -7,9 +7,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
@@ -18,20 +18,15 @@ import javax.servlet.ServletException;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
 
-public class ServletContext implements javax.servlet.ServletContext{
+public class ServletContext implements javax.servlet.ServletContext {
 
-	private Map<String, Servlet> servlets;
-	private Map<String, Class<?>> servletMappings;
+	private List<ServletConfig> servletConfigs = new ArrayList<>();
 	private List<String> defaultPages;
 	private String servletContextName;
 	private String appPath;
 
-	public Map<String, Class<?>> getServletsMappings() {
-		return servletMappings;
-	}
-
-	public void setServletsMappings(Map<String, Class<?>> servletsMappings) {
-		this.servletMappings = servletsMappings;
+	public List<ServletConfig> getServletConfigs() {
+		return servletConfigs;
 	}
 
 	public List<String> getDefaultPages() {
@@ -41,8 +36,7 @@ public class ServletContext implements javax.servlet.ServletContext{
 	public void setDefaultPages(List<String> defaultPages) {
 		this.defaultPages = defaultPages;
 	}
-	
-	
+
 	public String getServletContextName() {
 		return servletContextName;
 	}
@@ -85,8 +79,7 @@ public class ServletContext implements javax.servlet.ServletContext{
 		try {
 			Path path = Paths.get(file);
 			return Files.probeContentType(path);
-		}
-		catch(IOException exception) {
+		} catch (IOException exception) {
 			return "";
 		}
 	}
@@ -123,15 +116,17 @@ public class ServletContext implements javax.servlet.ServletContext{
 
 	@Override
 	public Servlet getServlet(String name) throws ServletException {
-		Servlet servlet = servlets.get(name);
-		if(servlet == null) {
-			return tryToInitServlet(name);
+		Servlet servlet = null;
+		for (ServletConfig sc : servletConfigs) {
+			servlet = sc.getServlets().get(name);
+			if (servlet != null) {
+				return servlet;
+			}
 		}
-		else {
-			return servlet;
-		}
+		return tryToInitServlet(name);
+
 	}
-	
+
 	private Servlet tryToInitServlet(String name) {
 		try {
 			return initServlet(name);
@@ -140,16 +135,16 @@ public class ServletContext implements javax.servlet.ServletContext{
 			return null;
 		}
 	}
-	
+
 	private Servlet initServlet(String name) throws InstantiationException, IllegalAccessException, ServletException {
-		Class<?> clazz = servletMappings.get(name);
-		if(clazz != null) {
-			Object object = clazz.newInstance();
-			return Servlet.class.cast(object);
+		for (ServletConfig sc : servletConfigs) {
+			Class<?> clazz = sc.getServletMappings().get(name);
+			if (clazz != null) {
+				Object object = clazz.newInstance();
+				return Servlet.class.cast(object);
+			}
 		}
-		else {
-			throw new ServletException("Servlet does not exists");
-		}
+		throw new ServletException("Servlet does not exists");
 	}
 
 	@Override
@@ -167,19 +162,19 @@ public class ServletContext implements javax.servlet.ServletContext{
 	@Override
 	public void log(String msg) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void log(Exception exception, String msg) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void log(String message, Throwable throwable) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -221,15 +216,13 @@ public class ServletContext implements javax.servlet.ServletContext{
 	@Override
 	public void setAttribute(String name, Object object) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void removeAttribute(String name) {
 		// TODO Auto-generated method stub
-		
+
 	}
-
-
 
 }

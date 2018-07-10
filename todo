@@ -2,6 +2,10 @@ zaimplementowanie servletconfig i servletcontext
 	- servletcontext mozna pobrac z zadania (wrzucic trzeba to do zadania) i z obiektu servletconfig (tez tam wrzucic trzeba)
 	- servletconfig trzeba wrzucic do metody init servletu
 
+implementacja ladowania danych z web.xml + refactoring (słabo się na to patrzy)
+
+testy poprawic
+
 
 Obsługa uruchomienia wielu aplikacji (moze oddzielna pula watkow dla kazdej aplikacji??)
 Rozkład klas metod i pakietow

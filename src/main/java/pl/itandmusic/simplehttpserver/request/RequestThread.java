@@ -12,6 +12,7 @@ import pl.itandmusic.simplehttpserver.model.ServletContext;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 import pl.itandmusic.simplehttpserver.model.HttpServletResponseImpl;
 import pl.itandmusic.simplehttpserver.model.RequestContent;
+import pl.itandmusic.simplehttpserver.model.ServletConfig;
 import pl.itandmusic.simplehttpserver.response.ResponseSendingService;
 import pl.itandmusic.simplehttpserver.utils.URIResolver;
 import pl.itandmusic.simplehttpserver.utils.URIUtils;
@@ -113,7 +114,13 @@ public class RequestThread implements Runnable {
 
 	private Class<?> loadClass(HttpServletRequestImpl request) {
 		String requestURI = URIResolver.getRequsetURI(request);
-		return servletContext.getServletsMappings().get(requestURI);
+		for(ServletConfig sc : servletContext.getServletConfigs()) {
+			Class<? extends Servlet> clazz = sc.getServletMappings().get(requestURI);
+			if(clazz != null) {
+				return clazz;
+			}
+		}
+		return null;
 	}
 	
 	private void loadAppConfig() {
