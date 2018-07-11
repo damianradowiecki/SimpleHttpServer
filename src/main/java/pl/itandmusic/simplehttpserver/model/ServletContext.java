@@ -21,7 +21,7 @@ import pl.itandmusic.simplehttpserver.configuration.Configuration;
 public class ServletContext implements javax.servlet.ServletContext {
 
 	private List<ServletConfig> servletConfigs = new ArrayList<>();
-	private List<String> defaultPages;
+	private List<String> defaultPages = new ArrayList<>();
 	private String servletContextName;
 	private String appPath;
 
@@ -116,35 +116,34 @@ public class ServletContext implements javax.servlet.ServletContext {
 
 	@Override
 	public Servlet getServlet(String name) throws ServletException {
-		Servlet servlet = null;
 		for (ServletConfig sc : servletConfigs) {
-			servlet = sc.getServlets().get(name);
-			if (servlet != null) {
-				return servlet;
+			if(sc.getServletName().equals(name)){
+				if(sc.getServlet() != null) {
+					return sc.getServlet();
+				}
+				else {
+					tryToInitServlet(sc);
+					return getServlet(name);
+				}
 			}
 		}
-		return tryToInitServlet(name);
-
+		throw new ServletException("Servlet not found");
 	}
 
-	private Servlet tryToInitServlet(String name) {
+	private void tryToInitServlet(ServletConfig servletConfig) {
 		try {
-			return initServlet(name);
+			initServlet(servletConfig);
 		} catch (InstantiationException | IllegalAccessException | ServletException e) {
 			e.printStackTrace();
-			return null;
 		}
 	}
 
-	private Servlet initServlet(String name) throws InstantiationException, IllegalAccessException, ServletException {
-		for (ServletConfig sc : servletConfigs) {
-			Class<?> clazz = sc.getServletMappings().get(name);
-			if (clazz != null) {
-				Object object = clazz.newInstance();
-				return Servlet.class.cast(object);
-			}
-		}
-		throw new ServletException("Servlet does not exists");
+	private void initServlet(ServletConfig servletConfig) throws InstantiationException, IllegalAccessException, ServletException{
+		Class<?> clazz = servletConfig.getClass();
+		Object object = clazz.newInstance();
+		Servlet servlet = Servlet.class.cast(object);
+		servlet.init(servletConfig);
+		servletConfig.setServlet(servlet);
 	}
 
 	@Override

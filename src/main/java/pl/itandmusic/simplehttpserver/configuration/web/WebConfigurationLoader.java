@@ -62,7 +62,7 @@ public class WebConfigurationLoader {
 
 	}
 
-	private static void loadAppConfiguration(String appFolderName){
+	private static void loadAppConfiguration(String appFolderName) throws MalformedURLException, ClassNotFoundException, FileNotFoundException, JAXBException{
 		
 		ServletContext servletContext = new ServletContext();
 		

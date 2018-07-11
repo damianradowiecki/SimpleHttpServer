@@ -115,7 +115,7 @@ public class RequestThread implements Runnable {
 	private Class<?> loadClass(HttpServletRequestImpl request) {
 		String requestURI = URIResolver.getRequsetURI(request);
 		for(ServletConfig sc : servletContext.getServletConfigs()) {
-			Class<? extends Servlet> clazz = sc.getServletMappings().get(requestURI);
+			Class<?> clazz = sc.getServletMappings().get(requestURI);
 			if(clazz != null) {
 				return clazz;
 			}

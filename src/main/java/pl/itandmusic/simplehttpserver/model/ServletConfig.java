@@ -4,13 +4,23 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 
 public class ServletConfig implements javax.servlet.ServletConfig {
 
+	private Servlet servlet;
 	private String servletName;
 	private String servletClass;
 	private Map<String, Class<?>> servletMappings = new HashMap<>();
+
+	public Servlet getServlet() {
+		return servlet;
+	}
+
+	public void setServlet(Servlet servlet) {
+		this.servlet = servlet;
+	}
 
 	public String getServletClass() {
 		return servletClass;

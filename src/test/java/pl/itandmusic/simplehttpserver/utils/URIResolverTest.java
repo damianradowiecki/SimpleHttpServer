@@ -17,23 +17,20 @@ import org.junit.Test;
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
 import pl.itandmusic.simplehttpserver.model.ServletContext;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
+import pl.itandmusic.simplehttpserver.model.ServletConfig;
 
 public class URIResolverTest {
 
 	private static List<HttpServletRequestImpl> requests;
-	private static Map<String, Class<?>> servletMappings_1;
-	private static Map<String, Class<?>> servletMappings_2;
-	private static ServletContext appConfig_1;
-	private static ServletContext appConfig_2;
+	private static ServletContext servletContext_1;
+	private static ServletContext servletContext_2;
 
 	
 	@BeforeClass
 	public static void init() {
 		requests = new ArrayList<>();
-		servletMappings_1 = new HashMap<>();
-		servletMappings_2 = new HashMap<>();
-		appConfig_1 = new ServletContext();
-		appConfig_2 = new ServletContext();
+		servletContext_1 = new ServletContext();
+		servletContext_2 = new ServletContext();
 	}
 	
 	@Before
@@ -60,17 +57,32 @@ public class URIResolverTest {
 
 		HttpServletRequestImpl request_7 = builder.setRequestURI(new URI("/SecondTestApp/notexistsing")).build();
 		requests.add(request_7);
+		
+		
+		ServletConfig servletConfig_1 = new ServletConfig();
+		
+		Map<String, Class<?>> servletMappings_1 = new HashMap<>();
 
 		servletMappings_1.put("/TestApp/WybierzPiwo.do", Object.class);
 		servletMappings_1.put("/TestApp/page", Object.class);
+		
+		servletConfig_1.setServletMappings(servletMappings_1);
+
+		ServletConfig servletConfig_2 = new ServletConfig();
+		
+		Map<String, Class<?>> servletMappings_2 = new HashMap<>();
+		
 		servletMappings_2.put("/SecondTestApp/anotherPage.do", Object.class);
 		servletMappings_2.put("/SecondTestApp/WybierzPiwo123.do", Object.class);
 
-		appConfig_1.setServletsMappings(servletMappings_1);
-		appConfig_2.setServletsMappings(servletMappings_2);
-
-		Configuration.applications.put("TestApp", appConfig_1);
-		Configuration.applications.put("SecondTestApp", appConfig_2);
+		servletConfig_2.setServletMappings(servletMappings_2);
+		
+		servletContext_1.getServletConfigs().add(servletConfig_1);
+		
+		servletContext_2.getServletConfigs().add(servletConfig_2);
+		
+		Configuration.applications.put("TestApp", servletContext_1);
+		Configuration.applications.put("SecondTestApp", servletContext_2);
 	}
 
 	@Test
