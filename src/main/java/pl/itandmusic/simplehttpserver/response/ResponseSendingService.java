@@ -175,7 +175,7 @@ public class ResponseSendingService {
 		writer.println();
 		writer.println("<html>");
 		writer.println("<head>");
-		writer.println("<title>" + Configuration.SERVER_NAME + "</title>");
+		writer.println("<title>" + Configuration.SERVER_INFO + "</title>");
 		writer.println("</head>");
 		writer.println("<body>");
 		writer.println("Server is running on port " + Configuration.port);

@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.Servlet;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -59,21 +61,21 @@ public class URIResolverTest {
 		requests.add(request_7);
 		
 		
-		ServletConfig servletConfig_1 = new ServletConfig();
+		ServletConfig servletConfig_1 = new ServletConfig(servletContext_1);
 		
-		Map<String, Class<?>> servletMappings_1 = new HashMap<>();
+		Map<String, Class<? extends Servlet>> servletMappings_1 = new HashMap<>();
 
-		servletMappings_1.put("/TestApp/WybierzPiwo.do", Object.class);
-		servletMappings_1.put("/TestApp/page", Object.class);
+		servletMappings_1.put("/TestApp/WybierzPiwo.do", Servlet.class);
+		servletMappings_1.put("/TestApp/page", Servlet.class);
 		
 		servletConfig_1.setServletMappings(servletMappings_1);
 
-		ServletConfig servletConfig_2 = new ServletConfig();
+		ServletConfig servletConfig_2 = new ServletConfig(servletContext_2);
 		
-		Map<String, Class<?>> servletMappings_2 = new HashMap<>();
+		Map<String, Class<? extends Servlet>> servletMappings_2 = new HashMap<>();
 		
-		servletMappings_2.put("/SecondTestApp/anotherPage.do", Object.class);
-		servletMappings_2.put("/SecondTestApp/WybierzPiwo123.do", Object.class);
+		servletMappings_2.put("/SecondTestApp/anotherPage.do", Servlet.class);
+		servletMappings_2.put("/SecondTestApp/WybierzPiwo123.do", Servlet.class);
 
 		servletConfig_2.setServletMappings(servletMappings_2);
 		

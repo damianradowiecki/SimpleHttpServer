@@ -8,11 +8,10 @@ import javax.servlet.ServletException;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
 import pl.itandmusic.simplehttpserver.logger.Logger;
-import pl.itandmusic.simplehttpserver.model.ServletContext;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 import pl.itandmusic.simplehttpserver.model.HttpServletResponseImpl;
 import pl.itandmusic.simplehttpserver.model.RequestContent;
-import pl.itandmusic.simplehttpserver.model.ServletConfig;
+import pl.itandmusic.simplehttpserver.model.ServletContext;
 import pl.itandmusic.simplehttpserver.response.ResponseSendingService;
 import pl.itandmusic.simplehttpserver.utils.URIResolver;
 import pl.itandmusic.simplehttpserver.utils.URIUtils;
@@ -79,12 +78,8 @@ public class RequestThread implements Runnable {
 	
 	private void tryToServiceRequestUsingServlet() {
 		try {
-			servletResponse = new HttpServletResponseImpl();
-			
-			Class<?> servletClass = loadClass(servletRequest);
-			
-			Servlet servlet = (Servlet) servletClass.newInstance();
-			
+			servletResponse = new HttpServletResponseImpl();			
+			Servlet servlet = servletContext.getServletByUrlPattern(servletRequest.getRequestURI());			
 			servlet.service(servletRequest, servletResponse);
 			
 			if (servletResponse.isRedirectResponse()) {
@@ -93,9 +88,9 @@ public class RequestThread implements Runnable {
 				responseSendingService.sendOKResponse(socket, servletResponse);
 			}
 
-		} catch (InstantiationException | IllegalAccessException | ServletException | IOException e) {
+		} catch (ServletException | IOException e) {
 			
-			logger.error("Could not ...");
+			logger.error("Could not service request using servlet.");
 			logger.error("Error message: " + e.getMessage());
 			
 			responseSendingService.tryToSendInternalErrorResponse(socket);
@@ -109,23 +104,11 @@ public class RequestThread implements Runnable {
 			logger.warn("Conuld not close socket");
 		}
 	}
-
-	
-
-	private Class<?> loadClass(HttpServletRequestImpl request) {
-		String requestURI = URIResolver.getRequsetURI(request);
-		for(ServletConfig sc : servletContext.getServletConfigs()) {
-			Class<?> clazz = sc.getServletMappings().get(requestURI);
-			if(clazz != null) {
-				return clazz;
-			}
-		}
-		return null;
-	}
 	
 	private void loadAppConfig() {
 		String requestURI = URIResolver.getRequsetURI(servletRequest);
 		for(String an : Configuration.applications.keySet()) {
+			//TODO it should starts with not contains
 			if(requestURI.contains(an)) {
 				this.servletContext = Configuration.applications.get(an);
 			}

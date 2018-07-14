@@ -12,8 +12,19 @@ public class ServletConfig implements javax.servlet.ServletConfig {
 	private Servlet servlet;
 	private String servletName;
 	private String servletClass;
-	private Map<String, Class<?>> servletMappings = new HashMap<>();
+	private Map<String, Class<? extends Servlet>> servletMappings = new HashMap<>();
+	private Map<String, String> initParams = new HashMap<>();
+	private ServletContext servletContext;
 
+	
+	public ServletConfig(ServletContext servletContext) {
+		this.servletContext = servletContext;
+	}
+	
+	public Map<String, String> getInitParams(){
+		return this.initParams;
+	}
+	
 	public Servlet getServlet() {
 		return servlet;
 	}
@@ -30,11 +41,11 @@ public class ServletConfig implements javax.servlet.ServletConfig {
 		this.servletClass = servletClass;
 	}
 
-	public Map<String, Class<?>> getServletMappings() {
+	public Map<String, Class<? extends Servlet>> getServletMappings() {
 		return servletMappings;
 	}
 
-	public void setServletMappings(Map<String, Class<?>> servletMappings) {
+	public void setServletMappings(Map<String, Class<? extends Servlet>> servletMappings) {
 		this.servletMappings = servletMappings;
 	}
 
@@ -49,20 +60,17 @@ public class ServletConfig implements javax.servlet.ServletConfig {
 
 	@Override
 	public ServletContext getServletContext() {
-		// TODO Auto-generated method stub
-		return null;
+		return servletContext;
 	}
 
 	@Override
 	public String getInitParameter(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		return initParams.get(name);
 	}
 
 	@Override
-	public Enumeration getInitParameterNames() {
-		// TODO Auto-generated method stub
-		return null;
+	public Enumeration<String> getInitParameterNames() {
+		return new EnumerationImpl<String>(initParams.keySet());
 	}
 
 }

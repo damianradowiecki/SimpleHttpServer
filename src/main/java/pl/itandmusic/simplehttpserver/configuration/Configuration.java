@@ -8,7 +8,7 @@ import pl.itandmusic.simplehttpserver.model.ServletContext;
 public class Configuration {
 	
 	public final static Map<String, ServletContext> applications = new HashMap<>();
-	public final static String SERVER_NAME = "Mini HTTP Server (has servlets compability)";
+	public final static String SERVER_INFO = "Mini HTTP Server (has servlets compability)";
 	public static int port;
 	public static String appsDirectory;
 	public static final int SERVLET_MAJOR_VERSION = 2;

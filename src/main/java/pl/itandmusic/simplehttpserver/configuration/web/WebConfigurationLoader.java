@@ -5,8 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -109,35 +107,44 @@ public class WebConfigurationLoader {
 	}
 	
 	private static void setContextParams(ServletContext servletContext, WebApp webApp) {
+		Map<String, String> initParams = new HashMap<>();
 		for(ContextParam cp : webApp.getContextParams()) {
-			servletContext.setAttribute(cp.getName(), cp.getValue());
+			initParams.put(cp.getName(), cp.getValue());
 		}
 	}
 	
 	private static void setServlets(ServletContext servletContext, WebApp webApp) {
 		for(Servlet s : webApp.getServlets()) {
-			ServletConfig servletConfig = new ServletConfig();
+			ServletConfig servletConfig = new ServletConfig(servletContext);
 			servletConfig.setServletName(s.getServletName());
 			servletConfig.setServletClass(s.getServletClass());
+			setServletInitParams(s, servletConfig);
 			servletContext.getServletConfigs().add(servletConfig);
 		}
-		
+	}
+	
+	private static void setServletInitParams(Servlet servlet, ServletConfig servletConfig) {
+		Map<String, String> initParams = servletConfig.getInitParams();
+		for(InitParam ip : servlet.getInitParams()) {
+			initParams.put(ip.getName(), ip.getValue());
+		}
 	}
 	
 	private static void setServletMappings(ServletContext servletContext, WebApp webApp) {
 		for(ServletConfig sc : servletContext.getServletConfigs()) {
 			for(ServletMapping sm : webApp.getServletMappings()) {
 				if(sm.getServletName().equals(sc.getServletName())) {
-					Class<?> clazz = getClassForUrlPattern(sm.getUrlPattern());
-					sc.getServletMappings().put(sm.getServletName(), clazz);
+					Class<? extends javax.servlet.Servlet> clazz = getClassForServletClass(sc.getServletClass());
+					sc.getServletMappings().put(sm.getUrlPattern(), clazz);
 				}
 			}
 		}
 	}
 	
-	private static Class<?> getClassForUrlPattern(String urlPattern){
+	@SuppressWarnings("unchecked")
+	private static Class<javax.servlet.Servlet> getClassForServletClass(String urlPattern){
 		try {
-			return Class.forName(urlPattern);
+			return (Class<javax.servlet.Servlet>) Class.forName(urlPattern);
 		} catch (ClassNotFoundException e) {
 			//TODO cos z tym trzeba zrobic
 			e.printStackTrace();

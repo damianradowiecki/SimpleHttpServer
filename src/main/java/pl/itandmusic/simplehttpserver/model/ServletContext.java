@@ -9,7 +9,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
@@ -17,13 +19,17 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
+import pl.itandmusic.simplehttpserver.logger.LogLevel;
+import pl.itandmusic.simplehttpserver.logger.Logger;
 
 public class ServletContext implements javax.servlet.ServletContext {
 
+	private Logger logger = Logger.getLogger(ServletContext.class);
 	private List<ServletConfig> servletConfigs = new ArrayList<>();
 	private List<String> defaultPages = new ArrayList<>();
 	private String servletContextName;
 	private String appPath;
+	private Map<String, String> initParams = new HashMap<>();
 
 	public List<ServletConfig> getServletConfigs() {
 		return servletConfigs;
@@ -129,6 +135,15 @@ public class ServletContext implements javax.servlet.ServletContext {
 		}
 		throw new ServletException("Servlet not found");
 	}
+	
+	public Servlet getServletByUrlPattern(String urlPattern) throws ServletException {
+		for (ServletConfig sc : servletConfigs) {
+			if(sc.getServletMappings().containsKey(urlPattern)){
+				return getServlet(sc.getServletName());
+			}
+		}
+		throw new ServletException("Servlet not found");
+	}
 
 	private void tryToInitServlet(ServletConfig servletConfig) {
 		try {
@@ -147,21 +162,20 @@ public class ServletContext implements javax.servlet.ServletContext {
 	}
 
 	@Override
-	public Enumeration getServlets() {
+	public Enumeration<Servlet> getServlets() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Enumeration getServletNames() {
-		// TODO Auto-generated method stub
+	public Enumeration<Servlet> getServletNames() {
+		//TODO
 		return null;
 	}
 
 	@Override
 	public void log(String msg) {
-		// TODO Auto-generated method stub
-
+		logger.log(msg, LogLevel.INFO);
 	}
 
 	@Override
@@ -184,20 +198,17 @@ public class ServletContext implements javax.servlet.ServletContext {
 
 	@Override
 	public String getServerInfo() {
-		// TODO Auto-generated method stub
-		return null;
+		return Configuration.SERVER_INFO;
 	}
 
 	@Override
 	public String getInitParameter(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		return initParams.get(name);
 	}
 
 	@Override
-	public Enumeration getInitParameterNames() {
-		// TODO Auto-generated method stub
-		return null;
+	public Enumeration<String> getInitParameterNames() {
+		return new EnumerationImpl<String>(initParams.keySet());
 	}
 
 	@Override

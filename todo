@@ -1,6 +1,4 @@
-Wrzucic servletcontext do servletu, inicjalizacja serwletow przy ich tworzeniu. Utworzyc jeden punkt tworzenie serwletow
-
-Zawezenie typu Class<?> do Class<? extends javax. .Servlet
+Zawezenie typu Class<?> do Class<? extends javax.servlet.Servlet
 
 Obsługa uruchomienia wielu aplikacji (moze oddzielna pula watkow dla kazdej aplikacji??)
 Rozkład klas metod i pakietow

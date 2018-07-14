@@ -17,7 +17,7 @@ import javax.servlet.ServletInputStream;
 
 import pl.itandmusic.simplehttpserver.configuration.web.WebConfigurationLoader;
 import pl.itandmusic.simplehttpserver.logger.Logger;
-import pl.itandmusic.simplehttpserver.model.HeaderNames;
+import pl.itandmusic.simplehttpserver.model.EnumerationImpl;
 import pl.itandmusic.simplehttpserver.model.HeaderValues;
 import pl.itandmusic.simplehttpserver.model.HttpMethod;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
@@ -155,7 +155,7 @@ public class RequestContentConverter {
 			}
 		}
 		
-		return new HeaderNames(names);
+		return new EnumerationImpl(names);
 	}
 	
 	String extractRemoteHost(Socket socket) {
