@@ -1,4 +1,6 @@
-Zawezenie typu Class<?> do Class<? extends javax.servlet.Servlet
+Implementacja metod
+Nasłuchiwacze (listeners)
+
 
 Obsługa uruchomienia wielu aplikacji (moze oddzielna pula watkow dla kazdej aplikacji??)
 Rozkład klas metod i pakietow
