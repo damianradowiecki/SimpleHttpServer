@@ -10,7 +10,7 @@ import pl.itandmusic.simplehttpserver.server.Server;
 
 public class Main {
 
-	public static void main(String[] args) throws JAXBException, ClassNotFoundException, IOException {
+	public static void main(String[] args) throws JAXBException, ClassNotFoundException, IOException, InstantiationException, IllegalAccessException {
 		
 		ServerConfigurationLoader.load();
 		WebConfigurationLoader.load();

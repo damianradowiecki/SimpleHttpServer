@@ -29,6 +29,9 @@ class WebApp {
 	@XmlElementWrapper(name = "welcome-file-list")
 	@XmlElement(name = "welcome-file")
 	private List<String> welcomeFiles;
+	
+	@XmlElement(name ="listener")
+	private List<Listener> listeners;
 
 	public String getDisplayName() {
 		return displayName;
@@ -86,4 +89,13 @@ class WebApp {
 		this.contextParams = contextParams;
 	}
 
+	public List<Listener> getListeners() {
+		return listeners;
+	}
+
+	public void setListeners(List<Listener> listeners) {
+		this.listeners = listeners;
+	}
+
+	
 }

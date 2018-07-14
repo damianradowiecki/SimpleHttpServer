@@ -12,7 +12,7 @@ public class WebConfigurationLoaderTest {
 	
 	
 	@Test
-	public void testWebConfigurationLoading() throws ClassNotFoundException, JAXBException, IOException {
+	public void testWebConfigurationLoading() throws ClassNotFoundException, JAXBException, IOException, InstantiationException, IllegalAccessException {
 		ServerConfigurationLoader.load();
 		WebConfigurationLoader.load();
 	}

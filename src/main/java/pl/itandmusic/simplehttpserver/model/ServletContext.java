@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,11 @@ public class ServletContext implements javax.servlet.ServletContext {
 	private String servletContextName;
 	private String appPath;
 	private Map<String, String> initParams = new HashMap<>();
+	private List<Class<? extends EventListener>> listeners = new ArrayList<>();
+
+	public List<Class<? extends EventListener>> getListeners() {
+		return listeners;
+	}
 
 	public List<ServletConfig> getServletConfigs() {
 		return servletConfigs;
@@ -123,11 +129,10 @@ public class ServletContext implements javax.servlet.ServletContext {
 	@Override
 	public Servlet getServlet(String name) throws ServletException {
 		for (ServletConfig sc : servletConfigs) {
-			if(sc.getServletName().equals(name)){
-				if(sc.getServlet() != null) {
+			if (sc.getServletName().equals(name)) {
+				if (sc.getServlet() != null) {
 					return sc.getServlet();
-				}
-				else {
+				} else {
 					tryToInitServlet(sc);
 					return getServlet(name);
 				}
@@ -135,10 +140,10 @@ public class ServletContext implements javax.servlet.ServletContext {
 		}
 		throw new ServletException("Servlet not found");
 	}
-	
+
 	public Servlet getServletByUrlPattern(String urlPattern) throws ServletException {
 		for (ServletConfig sc : servletConfigs) {
-			if(sc.getServletMappings().containsKey(urlPattern)){
+			if (sc.getServletMappings().containsKey(urlPattern)) {
 				return getServlet(sc.getServletName());
 			}
 		}
@@ -153,7 +158,8 @@ public class ServletContext implements javax.servlet.ServletContext {
 		}
 	}
 
-	private void initServlet(ServletConfig servletConfig) throws InstantiationException, IllegalAccessException, ServletException{
+	private void initServlet(ServletConfig servletConfig)
+			throws InstantiationException, IllegalAccessException, ServletException {
 		Class<?> clazz = servletConfig.getClass();
 		Object object = clazz.newInstance();
 		Servlet servlet = Servlet.class.cast(object);
@@ -169,7 +175,7 @@ public class ServletContext implements javax.servlet.ServletContext {
 
 	@Override
 	public Enumeration<Servlet> getServletNames() {
-		//TODO
+		// TODO
 		return null;
 	}
 
