@@ -1,6 +1,11 @@
+Nasluchiwacze ListenerTester.java l:18 NullPointerException
+
 Implementacja metod
 Nasłuchiwacze (listeners)
 TODO cos z tym trzeba zrobic
+
+teraz do glowengo class loadera dodane sa sciezki do poszczegolnych katalogow classes dla kazdej aplikacji - 
+- trzeba usunac ladowanie klas serwletow za pomoca specjalnych classloadero - niech laduja sie normalnie.
 
 Obsługa uruchomienia wielu aplikacji (moze oddzielna pula watkow dla kazdej aplikacji??)
 Rozkład klas metod i pakietow

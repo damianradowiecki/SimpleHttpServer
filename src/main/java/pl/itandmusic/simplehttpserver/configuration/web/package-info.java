@@ -2,7 +2,7 @@
 		@XmlNs(prefix = "xsi", namespaceURI = "http://www.w3.org/2001/XMLSchema-instance") })
 package pl.itandmusic.simplehttpserver.configuration.web;
 
-import java.util.List;
+import java.util.*;
 
 import javax.xml.bind.annotation.*;
 
@@ -21,17 +21,17 @@ class WebApp {
 	@XmlElement(name = "servlet")
 	private List<Servlet> servlets;
 	@XmlElement(name = "servlet-mapping")
-	private List<ServletMapping> servletMappings;
+	private List<ServletMapping> servletMappings = new ArrayList<>();
 
 	@XmlElement(name = "context-param")
-	private List<ContextParam> contextParams;
+	private List<ContextParam> contextParams = new ArrayList<>();
 
 	@XmlElementWrapper(name = "welcome-file-list")
 	@XmlElement(name = "welcome-file")
-	private List<String> welcomeFiles;
+	private List<String> welcomeFiles = new ArrayList<>();
 	
 	@XmlElement(name ="listener")
-	private List<Listener> listeners;
+	private List<Listener> listeners = new ArrayList<>();
 
 	public String getDisplayName() {
 		return displayName;

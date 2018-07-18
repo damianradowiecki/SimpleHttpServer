@@ -153,14 +153,14 @@ public class ServletContext implements javax.servlet.ServletContext {
 	private void tryToInitServlet(ServletConfig servletConfig) {
 		try {
 			initServlet(servletConfig);
-		} catch (InstantiationException | IllegalAccessException | ServletException e) {
+		} catch (InstantiationException | IllegalAccessException | ServletException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
 
 	private void initServlet(ServletConfig servletConfig)
-			throws InstantiationException, IllegalAccessException, ServletException {
-		Class<?> clazz = servletConfig.getClass();
+			throws InstantiationException, IllegalAccessException, ServletException, ClassNotFoundException {
+		Class<?> clazz = Class.forName(servletConfig.getServletClass());
 		Object object = clazz.newInstance();
 		Servlet servlet = Servlet.class.cast(object);
 		servlet.init(servletConfig);

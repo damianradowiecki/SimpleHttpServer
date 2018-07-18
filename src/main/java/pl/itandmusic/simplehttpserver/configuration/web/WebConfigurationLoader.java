@@ -4,7 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,12 +36,14 @@ public class WebConfigurationLoader {
 	private static List<String> appFolderNames = new ArrayList<>();
 
 	public static void load()
-			throws IOException, ClassNotFoundException, JAXBException, InstantiationException, IllegalAccessException {
+			throws IOException, ClassNotFoundException, JAXBException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
 
 		logger.info("Web configuration loading.");
 
 		loadAllAppFolderNames();
 
+		addClassesDirectoriesToClasspath();
+		
 		loadConfigurationForEveryApp();
 
 		logger.info("Web configuration loaded.");
@@ -64,6 +70,29 @@ public class WebConfigurationLoader {
 
 	}
 
+	private static void addClassesDirectoriesToClasspath() throws MalformedURLException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+		for (String fn : appFolderNames) {
+			addClassesDirectoryToClasspath(fn);
+		}
+	}
+	
+	private static void addClassesDirectoryToClasspath(String appFolderName) throws MalformedURLException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		Path pathToClasses = Paths.get(Configuration.appsDirectory, appFolderName, "WEB-INF", "classes");
+		
+		if(Files.exists(pathToClasses)) {
+			addClassesDirectoryToClasspath(pathToClasses);
+		}
+	}
+	
+	private static void addClassesDirectoryToClasspath(Path path) throws MalformedURLException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		URL classesURL = path.toFile().toURI().toURL();
+		URLClassLoader classLoader = (URLClassLoader)ClassLoader.getSystemClassLoader();
+		Class<URLClassLoader> urlClassLoaderClass = URLClassLoader.class;
+		Method addURLMethod = urlClassLoaderClass.getDeclaredMethod("addURL", new Class[] {URL.class});
+		addURLMethod.setAccessible(true);
+		addURLMethod.invoke(classLoader, classesURL);
+	}
+	
 	private static void loadAppConfiguration(String appFolderName) throws MalformedURLException, ClassNotFoundException,
 			FileNotFoundException, JAXBException, InstantiationException, IllegalAccessException {
 
@@ -138,20 +167,24 @@ public class WebConfigurationLoader {
 		}
 	}
 
-	private static void setServletMappings(ServletContext servletContext, WebApp webApp) {
+	@SuppressWarnings("unchecked")
+	private static void setServletMappings(ServletContext servletContext, WebApp webApp) throws MalformedURLException {
 		for (ServletConfig sc : servletContext.getServletConfigs()) {
 			for (ServletMapping sm : webApp.getServletMappings()) {
 				if (sm.getServletName().equals(sc.getServletName())) {
-					Class<? extends javax.servlet.Servlet> clazz = getClassForServletClass(sc.getServletClass());
-					sc.getServletMappings().put(sm.getUrlPattern(), clazz);
+					Class<? extends javax.servlet.Servlet> clazz = (Class<? extends javax.servlet.Servlet>) loadClassFromAppClassesFolder(
+							servletContext, sc.getServletClass());
+					sc.getServletMappings().put("/" + servletContext.getServletContextName() + sm.getUrlPattern(), clazz);
 				}
 			}
 		}
 	}
 
-	private static void setListeners(ServletContext servletContext, WebApp webApp) {
+	@SuppressWarnings("unchecked")
+	private static void setListeners(ServletContext servletContext, WebApp webApp) throws MalformedURLException {
 		for (Listener l : webApp.getListeners()) {
-			Class<? extends EventListener> clazz = getClassForListener(l.getListenerClass());
+			Class<? extends EventListener> clazz = (Class<? extends EventListener>) loadClassFromAppClassesFolder(
+					servletContext, l.getListenerClass());
 			servletContext.getListeners().add(clazz);
 		}
 
@@ -170,27 +203,24 @@ public class WebConfigurationLoader {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private static Class<? extends EventListener> getClassForListener(String listenerClass) {
+	private static Class<?> loadClassFromAppClassesFolder(ServletContext servletContext, String urlPattern){
+		URLClassLoader classLoader = null;
 		try {
-			return (Class<? extends EventListener>) Class.forName(listenerClass);
-		} catch (ClassNotFoundException e) {
+			Path path = Paths.get(Configuration.appsDirectory, servletContext.getServletContextName(), "WEB-INF", "classes");
+			URL url = path.toUri().toURL();
+			classLoader = new URLClassLoader(new URL[] { url });
+			return classLoader.loadClass(urlPattern);
+		} catch (ClassNotFoundException | MalformedURLException e) {
 			// TODO cos z tym trzeba zrobic
 			// chyba trzeba pociagnac te wyjatki w gore
 			e.printStackTrace();
 			return null;
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private static Class<javax.servlet.Servlet> getClassForServletClass(String urlPattern) {
-		try {
-			return (Class<javax.servlet.Servlet>) Class.forName(urlPattern);
-		} catch (ClassNotFoundException e) {
-			// TODO cos z tym trzeba zrobic
-			// chyba trzeba pociagnac te wyjatki w gore
-			e.printStackTrace();
-			return null;
+		} finally {
+			try {
+				classLoader.close();
+			} catch (Exception e) {
+				logger.warn("Class loader is not closed.");
+			}
 		}
 	}
 

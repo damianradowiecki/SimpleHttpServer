@@ -1,6 +1,7 @@
 package pl.itandmusic.simplehttpserver;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.xml.bind.JAXBException;
 
@@ -10,7 +11,7 @@ import pl.itandmusic.simplehttpserver.server.Server;
 
 public class Main {
 
-	public static void main(String[] args) throws JAXBException, ClassNotFoundException, IOException, InstantiationException, IllegalAccessException {
+	public static void main(String[] args) throws JAXBException, ClassNotFoundException, IOException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
 		
 		ServerConfigurationLoader.load();
 		WebConfigurationLoader.load();

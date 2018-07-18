@@ -6,7 +6,7 @@
 	<artifactId>SimpleHttpServer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<build>
-		<sourceDirectory>src</sourceDirectory>
+		<sourceDirectory>src/main/java</sourceDirectory>
 		<outputDirectory>target</outputDirectory>
 		<finalName>SimpleHttpServer</finalName>
 		<plugins>
