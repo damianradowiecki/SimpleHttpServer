@@ -97,12 +97,12 @@ public class RequestContentConverterTest {
 	
 	@Test
 	public void testHeadersExtracting() {
-		Map<String, Enumeration<String>> headers = requestContentConverter.extractHeaders(content_1);
+		Map<String, String> headers = requestContentConverter.extractHeaders(content_1);
 		assertTrue(headers.containsKey("Accept-Charset"));
 		assertTrue(headers.containsKey("Accept-Language"));
 		for(String key : headers.keySet()) {
 			if(key.equals("Accept-Charset")) {
-				HeaderValues headerValues = (HeaderValues)headers.get(key);
+				HeaderValues headerValues = new HeaderValues(headers.get(key));
 				int elementsCount = 0;
 				while(headerValues.hasMoreElements()) {
 					String value = headerValues.nextElement();
@@ -112,7 +112,7 @@ public class RequestContentConverterTest {
 				assertEquals(3, elementsCount);
 			}
 			else if(key.equals("Accept-Language")) {
-				HeaderValues headerValues = (HeaderValues)headers.get(key);
+				HeaderValues headerValues = new HeaderValues(headers.get(key));
 				int elementsCount = 0;
 				while(headerValues.hasMoreElements()) {
 					String value = headerValues.nextElement();

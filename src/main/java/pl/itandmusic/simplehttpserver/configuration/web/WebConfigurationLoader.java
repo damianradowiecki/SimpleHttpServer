@@ -144,9 +144,8 @@ public class WebConfigurationLoader {
 	}
 
 	private static void setContextParams(ServletContext servletContext, WebApp webApp) {
-		Map<String, String> initParams = new HashMap<>();
 		for (ContextParam cp : webApp.getContextParams()) {
-			initParams.put(cp.getName(), cp.getValue());
+			servletContext.getInitParameters().put(cp.getName(), cp.getValue());
 		}
 	}
 

@@ -18,7 +18,6 @@ import javax.servlet.ServletInputStream;
 import pl.itandmusic.simplehttpserver.configuration.web.WebConfigurationLoader;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.EnumerationImpl;
-import pl.itandmusic.simplehttpserver.model.HeaderValues;
 import pl.itandmusic.simplehttpserver.model.HttpMethod;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 import pl.itandmusic.simplehttpserver.model.RequestContent;
@@ -36,7 +35,7 @@ public class RequestContentConverter {
 	private URI requestURI;
 	private StringBuffer requestURL;
 	private String queryString;
-	private Map<String, Enumeration<String>> headers;
+	private Map<String, String> headers;
 	private Enumeration<String> headerNames;
 	private String remoteAddress;
 	private ServletInputStream servletInputStream;
@@ -57,7 +56,7 @@ public class RequestContentConverter {
 		servletInputStream = new ServletInputStreamImpl(socket);
 		parameters = extractParameters(content, httpMethod);
 
-		HttpServletRequestImpl.Builder builder = new HttpServletRequestImpl.Builder();
+		HttpServletRequestImpl.Builder builder = HttpServletRequestImpl.Builder.newBuilder();
 
 		return builder
 				.setHttpMethod(httpMethod)
@@ -125,8 +124,8 @@ public class RequestContentConverter {
 		return queryString;
 	}
 
-	Map<String, Enumeration<String>> extractHeaders(List<String> content) {
-		Map<String, Enumeration<String>> headers = new HashMap<>();
+	Map<String, String> extractHeaders(List<String> content) {
+		Map<String, String> headers = new HashMap<>();
 
 		pattern = Pattern.compile("(?<NAME>.+?):(?<VALUES>(.+?,.+?)*)");
 
@@ -134,8 +133,7 @@ public class RequestContentConverter {
 			matcher = pattern.matcher(s);
 			if (matcher.matches()) {
 				String headerName = matcher.group("NAME");
-				HeaderValues headerValues = new HeaderValues(matcher.group("VALUES"));
-				headers.put(headerName, headerValues);
+				headers.put(headerName, matcher.group("VALUES"));
 			}
 		}
 		return headers;
@@ -155,7 +153,7 @@ public class RequestContentConverter {
 			}
 		}
 		
-		return new EnumerationImpl(names);
+		return new EnumerationImpl<String>(names);
 	}
 	
 	String extractRemoteHost(Socket socket) {

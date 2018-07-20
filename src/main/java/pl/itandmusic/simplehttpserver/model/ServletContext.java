@@ -32,6 +32,7 @@ public class ServletContext implements javax.servlet.ServletContext {
 	private String appPath;
 	private Map<String, String> initParams = new HashMap<>();
 	private List<Class<? extends EventListener>> listeners = new ArrayList<>();
+	private Map<String, Object> attributes = new HashMap<>();
 
 	public List<Class<? extends EventListener>> getListeners() {
 		return listeners;
@@ -67,8 +68,7 @@ public class ServletContext implements javax.servlet.ServletContext {
 
 	@Override
 	public String getContextPath() {
-		// TODO Auto-generated method stub
-		return null;
+		return "/" + servletContextName;
 	}
 
 	@Override
@@ -206,6 +206,10 @@ public class ServletContext implements javax.servlet.ServletContext {
 	public String getServerInfo() {
 		return Configuration.SERVER_INFO;
 	}
+	
+	public Map<String, String> getInitParameters(){
+		return this.initParams;
+	}
 
 	@Override
 	public String getInitParameter(String name) {
@@ -219,26 +223,22 @@ public class ServletContext implements javax.servlet.ServletContext {
 
 	@Override
 	public Object getAttribute(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		return attributes.get(name);
 	}
 
 	@Override
-	public Enumeration getAttributeNames() {
-		// TODO Auto-generated method stub
-		return null;
+	public Enumeration<String> getAttributeNames() {
+		return new EnumerationImpl<>(attributes.keySet());
 	}
 
 	@Override
 	public void setAttribute(String name, Object object) {
-		// TODO Auto-generated method stub
-
+		attributes.put(name, object);
 	}
 
 	@Override
 	public void removeAttribute(String name) {
-		// TODO Auto-generated method stub
-
+		attributes.remove(name);
 	}
 
 }

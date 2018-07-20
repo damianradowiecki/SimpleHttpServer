@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -15,21 +16,25 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import pl.itandmusic.simplehttpserver.logger.Logger;
+
 public class HttpServletRequestImpl implements HttpServletRequest {
 
+	private final Logger logger = Logger.getLogger(HttpServletRequestImpl.class);
 	private HttpMethod method;
 	private URI requestURI;
 	private String protocol;
 	private StringBuffer requestURL;
 	private String queryString;
-	private Map<String,Enumeration<String>> headers;
+	private Map<String,String> headers;
 	private Enumeration<String> headerNames;
 	private String remoteAddress;
 	private ServletInputStream servletInputStream;
 	private Map<String, String> parameters;
+	private Map<String, Object> attributes;
 
 	private HttpServletRequestImpl(HttpMethod method, URI requestURI, String protocol, StringBuffer requestURL,
-			String queryString, Map<String,Enumeration<String>> headers, Enumeration<String> headerNames,
+			String queryString, Map<String,String> headers, Enumeration<String> headerNames,
 			String remoteAddress, ServletInputStream servletInputStream, Map<String, String> parameters) {
 		this.method = method;
 		this.requestURI = requestURI;
@@ -44,33 +49,28 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
-	public Object getAttribute(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public Object getAttribute(String name) {
+		return attributes.get(name);
 	}
 
 	@Override
-	public Enumeration getAttributeNames() {
-		// TODO Auto-generated method stub
-		return null;
+	public Enumeration<String> getAttributeNames() {
+		return new EnumerationImpl<String>(attributes.keySet());
 	}
 
 	@Override
 	public String getCharacterEncoding() {
-		// TODO Auto-generated method stub
-		return null;
+		return headers.get("Content-Encoding");
 	}
 
 	@Override
 	public int getContentLength() {
-		// TODO Auto-generated method stub
-		return 0;
+		return Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
 	}
 
 	@Override
 	public String getContentType() {
-		// TODO Auto-generated method stub
-		return null;
+		return headers.get("Content-Type");
 	}
 
 	@Override
@@ -194,15 +194,14 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
-	public void removeAttribute(String arg0) {
-		// TODO Auto-generated method stub
+	public void removeAttribute(String name) {
+		attributes.remove(name);
 
 	}
 
 	@Override
-	public void setAttribute(String arg0, Object arg1) {
-		// TODO Auto-generated method stub
-
+	public void setAttribute(String name, Object value) {
+		attributes.put(name, value);
 	}
 
 	@Override
@@ -237,10 +236,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public String getHeader(String name) {
-		if(headers.get(name).hasMoreElements()) {
-			return headers.get(name).nextElement();
-		}
-		return null;
+		return headers.get(name);
 	}
 
 	@Override
@@ -250,13 +246,19 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public Enumeration<String> getHeaders(String name) {
-		return headers.get(name);
+		return new HeaderValues(headers.get(name));
 	}
 
 	@Override
-	public int getIntHeader(String arg0) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int getIntHeader(String name) {
+		int result = 0;
+		try {
+			result = Integer.parseInt(headers.get(name));
+		}
+		catch(Exception exception) {
+			logger.warn("Couldn't get int header. Returning 0.");
+		}
+		return result;
 	}
 
 	@Override
@@ -363,11 +365,15 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		private URI requestURI;
 		private StringBuffer requestURL;
 		private String queryString;
-		private Map<String,Enumeration<String>> headers;
+		private Map<String,String> headers;
 		private Enumeration<String> headerNames;
 		private String remoteAddress;
 		private ServletInputStream servletInputStream;
 		private Map<String, String> parameters;
+		
+		public static Builder newBuilder() {
+			return new Builder();
+		}
 		
 		public HttpServletRequestImpl build() {
 			return new HttpServletRequestImpl(method, requestURI, protocol, requestURL, 
@@ -400,7 +406,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 			return this;
 		}
 		
-		public Builder setHeaders(Map<String,Enumeration<String>> headers) {
+		public Builder setHeaders(Map<String,String> headers) {
 			this.headers = headers;
 			return this;
 		}
