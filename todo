@@ -1,6 +1,9 @@
+Implementacja metody getCookies
+Obsluga sesji
+Obsluga usuwania sesji (cron) - ustawienia w web.xml
 Implementacja metod
-Nasłuchiwacze (listeners)
-TODO cos z tym trzeba zrobic
+Wszystkie nasłuchiwacze (listeners)
+Wyspapienia TODO cos z tym trzeba zrobic
 
 teraz do glowengo class loadera dodane sa sciezki do poszczegolnych katalogow classes dla kazdej aplikacji - 
 - trzeba usunac ladowanie klas serwletow za pomoca specjalnych classloadero - niech laduja sie normalnie.

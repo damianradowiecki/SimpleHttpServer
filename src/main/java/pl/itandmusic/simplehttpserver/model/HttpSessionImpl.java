@@ -28,9 +28,8 @@ public class HttpSessionImpl implements HttpSession {
 	}
 
 	@Override
-	public Enumeration getAttributeNames() {
-		// TODO Auto-generated method stub
-		return null;
+	public Enumeration<String> getAttributeNames() {
+		return new EnumerationImpl<String>(attributes.keySet());
 	}
 
 	@Override
@@ -113,6 +112,11 @@ public class HttpSessionImpl implements HttpSession {
 	public void setMaxInactiveInterval(int arg0) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.id.hashCode();
 	}
 
 }

@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import pl.itandmusic.simplehttpserver.logger.Logger;
+import pl.itandmusic.simplehttpserver.session.SessionManager;
+import pl.itandmusic.simplehttpserver.utils.CookieConverter;
 
 public class HttpServletRequestImpl implements HttpServletRequest {
 
@@ -224,8 +226,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public Cookie[] getCookies() {
-		// TODO Auto-generated method stub
-		return null;
+		String cookieHeader = headers.get("Cookie");
+		return CookieConverter.convertToArray(cookieHeader);
 	}
 
 	@Override
@@ -313,8 +315,9 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public HttpSession getSession() {
-		// TODO Auto-generated method stub
-		return null;
+		getCookies()[0].
+		SessionManager sessionManager = SessionManager.getSessionManager();
+		return sessionManager.createIfNotExists(sessionId);
 	}
 
 	@Override
