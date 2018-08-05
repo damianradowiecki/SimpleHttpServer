@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 
 import pl.itandmusic.simplehttpserver.model.HttpSessionImpl;
+import pl.itandmusic.simplehttpserver.service.CookieService;
 import pl.itandmusic.simplehttpserver.utils.RandomString;
 
 public class SessionManager {
@@ -22,13 +24,20 @@ public class SessionManager {
 		return sessionManager;
 	}
 	
+	public boolean sessionExists(String sessionId) {
+		return getSessionById(sessionId).isPresent();
+	}
+	
+	public boolean sessionExists(Cookie[] cookies) {
+		return CookieService.getSessionIdCookie(cookies).isPresent();
+	}
+	
 	public HttpSession createNewSession() {
-		String newSessionId = null;
-		while(!getInUseSessionIds().contains((newSessionId = RandomString.generate())));
+		String newSessionId = generateSessionId();
 		return new HttpSessionImpl(newSessionId);
 	}
 	
-	public Optional<HttpSession> getExistingSession(String sessionId) { 
+	public Optional<HttpSession> getSessionById(String sessionId) { 
 			return SessionContainer
 			.SESSIONS
 			.stream()
@@ -41,7 +50,7 @@ public class SessionManager {
 			return createNewSession();
 		}
 		else{
-			Optional<HttpSession> optinalHttpSession = getExistingSession(sessionId);
+			Optional<HttpSession> optinalHttpSession = getSessionById(sessionId);
 			if(optinalHttpSession.isPresent()) {
 				return optinalHttpSession.get();
 			}
@@ -49,6 +58,16 @@ public class SessionManager {
 				return createNewSession();
 			}
 		}
+	}
+	
+	public void destorySession(HttpSession httpSession) {
+		SessionContainer.SESSIONS.remove(httpSession);
+	}
+	
+	private String generateSessionId() {
+		String sessionId = null;
+		while(!getInUseSessionIds().contains((sessionId = RandomString.generate())));
+		return sessionId;
 	}
 	
 	private synchronized List<String> getInUseSessionIds(){

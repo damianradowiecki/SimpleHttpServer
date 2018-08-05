@@ -3,12 +3,13 @@ package pl.itandmusic.simplehttpserver.model;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.CookieManager;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import pl.itandmusic.simplehttpserver.logger.Logger;
+import pl.itandmusic.simplehttpserver.service.CookieService;
 import pl.itandmusic.simplehttpserver.session.SessionManager;
 import pl.itandmusic.simplehttpserver.utils.CookieConverter;
 
@@ -28,7 +30,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	private String protocol;
 	private StringBuffer requestURL;
 	private String queryString;
-	private Map<String,String> headers;
+	private Map<String, String> headers;
 	private Enumeration<String> headerNames;
 	private String remoteAddress;
 	private ServletInputStream servletInputStream;
@@ -36,8 +38,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	private Map<String, Object> attributes;
 
 	private HttpServletRequestImpl(HttpMethod method, URI requestURI, String protocol, StringBuffer requestURL,
-			String queryString, Map<String,String> headers, Enumeration<String> headerNames,
-			String remoteAddress, ServletInputStream servletInputStream, Map<String, String> parameters) {
+			String queryString, Map<String, String> headers, Enumeration<String> headerNames, String remoteAddress,
+			ServletInputStream servletInputStream, Map<String, String> parameters) {
 		this.method = method;
 		this.requestURI = requestURI;
 		this.protocol = protocol;
@@ -256,8 +258,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		int result = 0;
 		try {
 			result = Integer.parseInt(headers.get(name));
-		}
-		catch(Exception exception) {
+		} catch (Exception exception) {
 			logger.warn("Couldn't get int header. Returning 0.");
 		}
 		return result;
@@ -315,15 +316,33 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public HttpSession getSession() {
-		getCookies()[0].
+
 		SessionManager sessionManager = SessionManager.getSessionManager();
-		return sessionManager.createIfNotExists(sessionId);
+		Optional<String> optionalSessionId = CookieService.getSessionId(getCookies());
+		if (optionalSessionId.isPresent()) {
+			return sessionManager.createIfNotExists(optionalSessionId.get());
+		} else {
+			return sessionManager.createNewSession();
+		}
+
 	}
 
 	@Override
-	public HttpSession getSession(boolean arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public HttpSession getSession(boolean create) {
+
+		if (create) {
+			return getSession();
+		} else {
+			SessionManager sessionManager = SessionManager.getSessionManager();
+			Optional<String> optionalSessionId = CookieService.getSessionId(getCookies());
+			if(optionalSessionId.isPresent()) {
+				return sessionManager.getSessionById(optionalSessionId.get()).get();
+			}
+			else {
+				return null;
+			}
+		}
+
 	}
 
 	@Override
@@ -368,20 +387,19 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		private URI requestURI;
 		private StringBuffer requestURL;
 		private String queryString;
-		private Map<String,String> headers;
+		private Map<String, String> headers;
 		private Enumeration<String> headerNames;
 		private String remoteAddress;
 		private ServletInputStream servletInputStream;
 		private Map<String, String> parameters;
-		
+
 		public static Builder newBuilder() {
 			return new Builder();
 		}
-		
+
 		public HttpServletRequestImpl build() {
-			return new HttpServletRequestImpl(method, requestURI, protocol, requestURL, 
-					queryString, headers, headerNames, remoteAddress, servletInputStream,
-					parameters);
+			return new HttpServletRequestImpl(method, requestURI, protocol, requestURL, queryString, headers,
+					headerNames, remoteAddress, servletInputStream, parameters);
 		}
 
 		public Builder setHttpMethod(HttpMethod method) {
@@ -408,27 +426,27 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 			this.queryString = queryString;
 			return this;
 		}
-		
-		public Builder setHeaders(Map<String,String> headers) {
+
+		public Builder setHeaders(Map<String, String> headers) {
 			this.headers = headers;
 			return this;
 		}
-		
+
 		public Builder setHeaderNames(Enumeration<String> headerNames) {
 			this.headerNames = headerNames;
 			return this;
 		}
-		
+
 		public Builder setRemoteAddress(String remoteAddress) {
 			this.remoteAddress = remoteAddress;
 			return this;
 		}
-		
+
 		public Builder setServletInputStream(ServletInputStream servletInputStream) {
 			this.servletInputStream = servletInputStream;
 			return this;
 		}
-		
+
 		public Builder setParameters(Map<String, String> parameters) {
 			this.parameters = parameters;
 			return this;

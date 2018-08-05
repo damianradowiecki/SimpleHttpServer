@@ -1,6 +1,7 @@
 package pl.itandmusic.simplehttpserver.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.Cookie;
@@ -23,6 +24,10 @@ public class CookieConverter {
 
 		return cookies;
 	}
+	
+	public static List<Cookie> convertToList(Cookie[] cookies){
+		return Arrays.asList(cookies);
+ 	}
 
 	public static Cookie[] convertToArray(String cookieHeader) {
 		return convertToList(cookieHeader).toArray(new Cookie[0]);

@@ -1,5 +1,3 @@
-Implementacja metody getCookies
-Obsluga sesji
 Obsluga usuwania sesji (cron) - ustawienia w web.xml
 Implementacja metod
 Wszystkie nasłuchiwacze (listeners)
