@@ -1,4 +1,5 @@
 Obsluga usuwania sesji (cron) - ustawienia w web.xml
+REFAKTORING
 Implementacja metod
 Wszystkie nasłuchiwacze (listeners)
 Wyspapienia TODO cos z tym trzeba zrobic
