@@ -36,6 +36,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	private ServletInputStream servletInputStream;
 	private Map<String, String> parameters;
 	private Map<String, Object> attributes;
+	private ServletContext servletContext;
 
 	private HttpServletRequestImpl(HttpMethod method, URI requestURI, String protocol, StringBuffer requestURL,
 			String queryString, Map<String, String> headers, Enumeration<String> headerNames, String remoteAddress,
@@ -317,7 +318,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	@Override
 	public HttpSession getSession() {
 
-		SessionManager sessionManager = SessionManager.getSessionManager();
+		getSer
 		Optional<String> optionalSessionId = CookieService.getSessionId(getCookies());
 		if (optionalSessionId.isPresent()) {
 			return sessionManager.createIfNotExists(optionalSessionId.get());

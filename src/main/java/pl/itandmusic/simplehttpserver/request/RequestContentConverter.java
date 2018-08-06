@@ -21,7 +21,9 @@ import pl.itandmusic.simplehttpserver.model.EnumerationImpl;
 import pl.itandmusic.simplehttpserver.model.HttpMethod;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 import pl.itandmusic.simplehttpserver.model.RequestContent;
+import pl.itandmusic.simplehttpserver.model.ServletContext;
 import pl.itandmusic.simplehttpserver.model.ServletInputStreamImpl;
+import pl.itandmusic.simplehttpserver.utils.URIResolver;
 
 public class RequestContentConverter {
 
@@ -55,7 +57,10 @@ public class RequestContentConverter {
 		remoteAddress = extractRemoteHost(socket);
 		servletInputStream = new ServletInputStreamImpl(socket);
 		parameters = extractParameters(content, httpMethod);
-
+		//TODO refactoring, inserting this data into request
+		ServletContext servletContext = URIResolver.anyAppRequest(requestURI);
+		boolean servetInfoRequest = URIResolver.serverInfoRequest(requestURI);
+		boolean defaultAppPageRequest = URIResolver.defaultAppPageRequest(requestURI);
 		HttpServletRequestImpl.Builder builder = HttpServletRequestImpl.Builder.newBuilder();
 
 		return builder

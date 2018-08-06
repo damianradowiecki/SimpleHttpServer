@@ -15,7 +15,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EventListener;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,11 +28,13 @@ import pl.itandmusic.simplehttpserver.configuration.Configuration;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.ServletConfig;
 import pl.itandmusic.simplehttpserver.model.ServletContext;
+import pl.itandmusic.simplehttpserver.session.SessionManager;
 
 public class WebConfigurationLoader {
 
 	private static final Logger logger = Logger.getLogger(WebConfigurationLoader.class);
 	private static List<String> appFolderNames = new ArrayList<>();
+	private static final int DEFAULT_SESSION_TIMEOUT = 30;
 
 	public static void load()
 			throws IOException, ClassNotFoundException, JAXBException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
@@ -111,6 +112,8 @@ public class WebConfigurationLoader {
 		setServlets(servletContext, webApp);
 
 		setServletMappings(servletContext, webApp);
+		
+		setSessionConfiguration(servletContext, webApp);
 
 		runServletInitializedMethodOnListeners(servletContext);
 
@@ -177,6 +180,18 @@ public class WebConfigurationLoader {
 				}
 			}
 		}
+	}
+	
+	private static void setSessionConfiguration(ServletContext servletContext, WebApp webApp) {
+		SessionManager sessionManager = new SessionManager();
+		if(webApp.getSessionConfig().getSessionTimeout() > 0) {
+			sessionManager.setSessionTimeout(webApp.getSessionConfig().getSessionTimeout());
+		}
+		else {
+			sessionManager.setSessionTimeout(DEFAULT_SESSION_TIMEOUT);
+		}
+		
+		servletContext.setSessionManager(sessionManager);
 	}
 
 	@SuppressWarnings("unchecked")

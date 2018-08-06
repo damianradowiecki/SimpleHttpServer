@@ -43,8 +43,12 @@ public class RequestThread implements Runnable {
 			return;
 		}
 		
+		ServletContext servletContext = null;
+		
 		servletRequest = requestContentConverter.convert(content, socket);
 		
+		
+		//TODO use flag requestType from request
 		if (URIResolver.serverInfoRequest(servletRequest)) {
 			responseSendingService.tryToLoadServerPage(socket);
 		} 
@@ -52,8 +56,9 @@ public class RequestThread implements Runnable {
 			loadAppConfig();
 			loadAppDefaultPage();
 		}
-		else if(URIResolver.anyAppRequest(servletRequest)){
+		else if((servletContext = URIResolver.anyAppRequest(servletRequest)) != null){
 			loadAppConfig();
+			servletRequest.set
 			tryToServiceRequestUsingServlet();
 		}
 		else {

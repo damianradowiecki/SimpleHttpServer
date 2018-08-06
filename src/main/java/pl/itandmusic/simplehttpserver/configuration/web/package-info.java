@@ -29,9 +29,20 @@ class WebApp {
 	@XmlElementWrapper(name = "welcome-file-list")
 	@XmlElement(name = "welcome-file")
 	private List<String> welcomeFiles = new ArrayList<>();
-	
-	@XmlElement(name ="listener")
+
+	@XmlElement(name = "listener")
 	private List<Listener> listeners = new ArrayList<>();
+
+	@XmlElement(name = "session-config")
+	private SessionConfig sessionConfig;
+
+	public SessionConfig getSessionConfig() {
+		return sessionConfig;
+	}
+
+	public void setSessionConfig(SessionConfig sessionConfig) {
+		this.sessionConfig = sessionConfig;
+	}
 
 	public String getDisplayName() {
 		return displayName;
@@ -97,5 +108,4 @@ class WebApp {
 		this.listeners = listeners;
 	}
 
-	
 }

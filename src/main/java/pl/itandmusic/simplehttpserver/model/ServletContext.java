@@ -22,6 +22,7 @@ import javax.servlet.ServletException;
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
 import pl.itandmusic.simplehttpserver.logger.LogLevel;
 import pl.itandmusic.simplehttpserver.logger.Logger;
+import pl.itandmusic.simplehttpserver.session.SessionManager;
 
 public class ServletContext implements javax.servlet.ServletContext {
 
@@ -33,6 +34,15 @@ public class ServletContext implements javax.servlet.ServletContext {
 	private Map<String, String> initParams = new HashMap<>();
 	private List<Class<? extends EventListener>> listeners = new ArrayList<>();
 	private Map<String, Object> attributes = new HashMap<>();
+	private SessionManager sessionManager;
+
+	public SessionManager getSessionManager() {
+		return sessionManager;
+	}
+
+	public void setSessionManager(SessionManager sessionManager) {
+		this.sessionManager = sessionManager;
+	}
 
 	public List<Class<? extends EventListener>> getListeners() {
 		return listeners;
@@ -206,8 +216,8 @@ public class ServletContext implements javax.servlet.ServletContext {
 	public String getServerInfo() {
 		return Configuration.SERVER_INFO;
 	}
-	
-	public Map<String, String> getInitParameters(){
+
+	public Map<String, String> getInitParameters() {
 		return this.initParams;
 	}
 

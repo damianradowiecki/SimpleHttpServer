@@ -25,4 +25,7 @@
   	<servlet-name>chooseBeer</servlet-name>
   	<url-pattern>/WybierzPiwo.do</url-pattern>
   </servlet-mapping>
+  <session-config>
+  	<session-timeout>15</session-timeout>
+  </session-config>
 </web-app>
