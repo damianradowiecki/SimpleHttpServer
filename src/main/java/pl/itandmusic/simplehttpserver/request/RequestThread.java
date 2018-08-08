@@ -43,48 +43,48 @@ public class RequestThread implements Runnable {
 			return;
 		}
 		
-		ServletContext servletContext = null;
-		
-		servletRequest = requestContentConverter.convert(content, socket);
-		
-		
 		//TODO use flag requestType from request
 		if (URIResolver.serverInfoRequest(servletRequest)) {
 			responseSendingService.tryToLoadServerPage(socket);
 		} 
 		else if(URIResolver.defaultAppPageRequest(servletRequest)) {
-			loadAppConfig();
+			//maybe this method should be in service?
 			loadAppDefaultPage();
 		}
-		else if((servletContext = URIResolver.anyAppRequest(servletRequest)) != null){
-			loadAppConfig();
-			servletRequest.set
-			tryToServiceRequestUsingServlet();
+		else if(URIResolver.anyAppRequest(servletRequest)){
+			//maybe this method should be in service?
+			tryToServiceRequestUsingServlet(content);
 		}
 		else {
 			responseSendingService.tryToSendPageNotFoundResponse(socket);
 		}
-
+		
 		tryToCloseSocket(socket);
 
 	}
 	
 	private void loadAppDefaultPage() {
 
+		loadAppConfig();
+		
 		if(URIResolver.properDefaultAppPageRequest(servletRequest)) {
 			responseSendingService.tryToLoadDefaultPage(socket, servletContext);
 		}
 		else {
-			String URI = URIResolver.getRequsetURI(servletRequest);
+			String URI = URIResolver.getRequestURI(servletRequest);
 			String correctedURI = URIUtils.correctUnproperDefaultPageURI(URI);
 			responseSendingService.tryToSendRedirectResponse(socket,  correctedURI);
 		}
 	}
 	
-	private void tryToServiceRequestUsingServlet() {
+	private void tryToServiceRequestUsingServlet(RequestContent content) {
 		try {
+			
+			loadAppConfig();
+			
+			servletRequest = requestContentConverter.convert(content, socket);
 			servletResponse = new HttpServletResponseImpl();			
-			Servlet servlet = servletContext.getServletByUrlPattern(servletRequest.getRequestURI());			
+			Servlet servlet = servletContext.getServletByUrlPattern(servletRequest.getRequestURI());
 			servlet.service(servletRequest, servletResponse);
 			
 			if (servletResponse.isRedirectResponse()) {
@@ -111,9 +111,9 @@ public class RequestThread implements Runnable {
 	}
 	
 	private void loadAppConfig() {
-		String requestURI = URIResolver.getRequsetURI(servletRequest);
+		String requestURI = URIResolver.getRequestURI(servletRequest);
 		for(String an : Configuration.applications.keySet()) {
-			//TODO it should starts with not contains
+			//TODO change this condition. It can make some problems
 			if(requestURI.contains(an)) {
 				this.servletContext = Configuration.applications.get(an);
 			}

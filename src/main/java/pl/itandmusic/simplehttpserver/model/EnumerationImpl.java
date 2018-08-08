@@ -2,6 +2,7 @@ package pl.itandmusic.simplehttpserver.model;
 
 import java.util.Enumeration;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ public class EnumerationImpl<T> implements Enumeration<T> {
 
 	@Override
 	public T nextElement() {
+		if(currentPosition > ( strings.size() -1)) throw new NoSuchElementException();
 		return strings.get(currentPosition++);
 	}
 

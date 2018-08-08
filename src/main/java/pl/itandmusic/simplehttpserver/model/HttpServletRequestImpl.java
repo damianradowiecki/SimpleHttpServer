@@ -3,7 +3,6 @@ package pl.itandmusic.simplehttpserver.model;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.CookieManager;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Enumeration;
@@ -36,7 +35,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	private ServletInputStream servletInputStream;
 	private Map<String, String> parameters;
 	private Map<String, Object> attributes;
-	private ServletContext servletContext;
+//	private ServletContext servletContext;
+	
 
 	private HttpServletRequestImpl(HttpMethod method, URI requestURI, String protocol, StringBuffer requestURL,
 			String queryString, Map<String, String> headers, Enumeration<String> headerNames, String remoteAddress,
@@ -317,15 +317,13 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public HttpSession getSession() {
-
-		getSer
+		SessionManager sessionManager = servletContext.getSessionManager();
 		Optional<String> optionalSessionId = CookieService.getSessionId(getCookies());
 		if (optionalSessionId.isPresent()) {
 			return sessionManager.createIfNotExists(optionalSessionId.get());
 		} else {
 			return sessionManager.createNewSession();
 		}
-
 	}
 
 	@Override
@@ -334,7 +332,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		if (create) {
 			return getSession();
 		} else {
-			SessionManager sessionManager = SessionManager.getSessionManager();
+			SessionManager sessionManager = servletContext.getSessionManager();
 			Optional<String> optionalSessionId = CookieService.getSessionId(getCookies());
 			if(optionalSessionId.isPresent()) {
 				return sessionManager.getSessionById(optionalSessionId.get()).get();

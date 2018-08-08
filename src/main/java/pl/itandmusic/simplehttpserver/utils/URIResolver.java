@@ -63,9 +63,9 @@ public class URIResolver {
 		return request.getRequestURI().toString();
 	}
 
-	public static ServletContext anyAppRequest(HttpServletRequestImpl request) {
+	public static boolean anyAppRequest(HttpServletRequestImpl request) {
 		String requestURI = getRequestURI(request);
-		return anyAppRequest(requestURI);
+		return anyAppRequest(requestURI) != null;
 	}
 	
 	public static ServletContext anyAppRequest(String requestURI) {
@@ -82,4 +82,6 @@ public class URIResolver {
 	public static ServletContext anyAppRequest(URI requestURI) {
 		return anyAppRequest(requestURI.toString());
 	}
+	
+	
 }
