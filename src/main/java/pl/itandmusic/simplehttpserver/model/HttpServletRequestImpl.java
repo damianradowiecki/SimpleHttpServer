@@ -16,6 +16,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import pl.itandmusic.simplehttpserver.enummeration.RequestType;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.service.CookieService;
 import pl.itandmusic.simplehttpserver.session.SessionManager;
@@ -35,12 +36,14 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	private ServletInputStream servletInputStream;
 	private Map<String, String> parameters;
 	private Map<String, Object> attributes;
-//	private ServletContext servletContext;
+	private ServletContext servletContext;
+	private RequestType requestType;
 	
 
 	private HttpServletRequestImpl(HttpMethod method, URI requestURI, String protocol, StringBuffer requestURL,
 			String queryString, Map<String, String> headers, Enumeration<String> headerNames, String remoteAddress,
-			ServletInputStream servletInputStream, Map<String, String> parameters) {
+			ServletInputStream servletInputStream, Map<String, String> parameters, ServletContext servletContext, 
+			RequestType requestType) {
 		this.method = method;
 		this.requestURI = requestURI;
 		this.protocol = protocol;
@@ -51,6 +54,12 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		this.remoteAddress = remoteAddress;
 		this.servletInputStream = servletInputStream;
 		this.parameters = parameters;
+		this.servletContext = servletContext;
+		this.requestType = requestType;
+	}
+	
+	public RequestType getRequestType() {
+		return this.requestType;
 	}
 
 	@Override
@@ -103,13 +112,13 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public Locale getLocale() {
-		// TODO Auto-generated method stub
+		//Accept-Language header
 		return null;
 	}
 
 	@Override
 	public Enumeration getLocales() {
-		// TODO Auto-generated method stub
+		// Accept-Language header values
 		return null;
 	}
 
@@ -391,6 +400,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		private String remoteAddress;
 		private ServletInputStream servletInputStream;
 		private Map<String, String> parameters;
+		private ServletContext servletContext;
+		private RequestType requestType;
 
 		public static Builder newBuilder() {
 			return new Builder();
@@ -398,7 +409,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 		public HttpServletRequestImpl build() {
 			return new HttpServletRequestImpl(method, requestURI, protocol, requestURL, queryString, headers,
-					headerNames, remoteAddress, servletInputStream, parameters);
+					headerNames, remoteAddress, servletInputStream, parameters, servletContext, requestType);
 		}
 
 		public Builder setHttpMethod(HttpMethod method) {
@@ -450,6 +461,18 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 			this.parameters = parameters;
 			return this;
 		}
+
+		public Builder setServletContext(ServletContext servletContext) {
+			this.servletContext = servletContext;
+			return this;
+		}
+
+		public Builder setRequestType(RequestType requestType) {
+			this.requestType = requestType;
+			return this;
+		}
+		
+		
 	}
 
 }

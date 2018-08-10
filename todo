@@ -1,6 +1,6 @@
-Umieszczenie ServletContextu w HttpServletRequestImpl
 Obsluga usuwania sesji (cron) - ustawienia w web.xml
 REFAKTORING
+TESTY
 Implementacja metod
 Wszystkie nasłuchiwacze (listeners)
 Wyspapienia TODO cos z tym trzeba zrobic

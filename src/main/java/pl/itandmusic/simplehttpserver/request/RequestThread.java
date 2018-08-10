@@ -7,6 +7,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
+import pl.itandmusic.simplehttpserver.enummeration.RequestType;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 import pl.itandmusic.simplehttpserver.model.HttpServletResponseImpl;
@@ -43,15 +44,14 @@ public class RequestThread implements Runnable {
 			return;
 		}
 		
-		//TODO use flag requestType from request
-		if (URIResolver.serverInfoRequest(servletRequest)) {
+		if (servletRequest.getRequestType().equals(RequestType.SERVER_INFO_REQUEST)) {
 			responseSendingService.tryToLoadServerPage(socket);
 		} 
-		else if(URIResolver.defaultAppPageRequest(servletRequest)) {
+		else if(servletRequest.getRequestType().equals(RequestType.DEFAULT_APP_PAGE_REQUEST)) {
 			//maybe this method should be in service?
 			loadAppDefaultPage();
 		}
-		else if(URIResolver.anyAppRequest(servletRequest)){
+		else if(servletRequest.getRequestType().equals(RequestType.APP_PAGE_REQUEST)){
 			//maybe this method should be in service?
 			tryToServiceRequestUsingServlet(content);
 		}

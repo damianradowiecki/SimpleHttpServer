@@ -5,9 +5,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
-import pl.itandmusic.simplehttpserver.model.ServletContext;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 import pl.itandmusic.simplehttpserver.model.ServletConfig;
+import pl.itandmusic.simplehttpserver.model.ServletContext;
 
 public class URIResolver {
 
@@ -82,6 +82,5 @@ public class URIResolver {
 	public static ServletContext anyAppRequest(URI requestURI) {
 		return anyAppRequest(requestURI.toString());
 	}
-	
 	
 }

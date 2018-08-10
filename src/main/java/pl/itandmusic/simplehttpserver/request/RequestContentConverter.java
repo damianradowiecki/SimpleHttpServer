@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletInputStream;
 
 import pl.itandmusic.simplehttpserver.configuration.web.WebConfigurationLoader;
+import pl.itandmusic.simplehttpserver.enummeration.RequestType;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.EnumerationImpl;
 import pl.itandmusic.simplehttpserver.model.HttpMethod;
@@ -42,6 +43,8 @@ public class RequestContentConverter {
 	private String remoteAddress;
 	private ServletInputStream servletInputStream;
 	private Map<String, String> parameters;
+	private ServletContext servletContext;
+	private RequestType requestType;
 
 	public HttpServletRequestImpl convert(RequestContent content, Socket socket) {
 
@@ -57,10 +60,8 @@ public class RequestContentConverter {
 		remoteAddress = extractRemoteHost(socket);
 		servletInputStream = new ServletInputStreamImpl(socket);
 		parameters = extractParameters(content, httpMethod);
-		//TODO refactoring, inserting this data into request
-		ServletContext servletContext = URIResolver.anyAppRequest(requestURI);
-		boolean servetInfoRequest = URIResolver.serverInfoRequest(requestURI);
-		boolean defaultAppPageRequest = URIResolver.defaultAppPageRequest(requestURI);
+		servletContext = URIResolver.anyAppRequest(requestURI);
+		requestType = determineRequestType(requestURI, servletContext);
 		HttpServletRequestImpl.Builder builder = HttpServletRequestImpl.Builder.newBuilder();
 
 		return builder
@@ -74,6 +75,8 @@ public class RequestContentConverter {
 				.setRemoteAddress(remoteAddress)
 				.setServletInputStream(servletInputStream)
 				.setParameters(parameters)
+				.setServletContext(servletContext)
+				.setRequestType(requestType)
 				.build();
 	}
 
@@ -200,4 +203,22 @@ public class RequestContentConverter {
 		}
 		return result;
 	}
+	
+	RequestType determineRequestType(URI requestURI, ServletContext servletContext) {
+		if(servletContext != null) {
+			if(URIResolver.defaultAppPageRequest(requestURI)) {
+				return RequestType.DEFAULT_APP_PAGE_REQUEST;
+			}
+			else {
+				return RequestType.APP_PAGE_REQUEST;
+			}
+		}
+		else if(URIResolver.serverInfoRequest(requestURI)) {
+			return RequestType.SERVER_INFO_REQUEST;
+		}
+		else {
+			return RequestType.UNKNOWN;
+		}
+	}
+	
 }
