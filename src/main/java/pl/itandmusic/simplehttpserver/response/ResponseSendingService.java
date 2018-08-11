@@ -11,16 +11,33 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
 import pl.itandmusic.simplehttpserver.logger.LogLevel;
 import pl.itandmusic.simplehttpserver.logger.Logger;
-import pl.itandmusic.simplehttpserver.model.ServletContext;
+import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 import pl.itandmusic.simplehttpserver.model.HttpServletResponseImpl;
+import pl.itandmusic.simplehttpserver.model.RequestContent;
+import pl.itandmusic.simplehttpserver.model.ServletContext;
+import pl.itandmusic.simplehttpserver.utils.URIResolver;
+import pl.itandmusic.simplehttpserver.utils.URIUtils;
 
 public class ResponseSendingService {
 
-	private final Logger logger = Logger.getLogger(ResponseSendingService.class);
-
+	private static final Logger logger = Logger.getLogger(ResponseSendingService.class);
+	private static ResponseSendingService responseSendingService;
+	
+	private ResponseSendingService() {}
+	
+	public static ResponseSendingService getResponseSendingService() {
+		if(responseSendingService == null) {
+			responseSendingService = new ResponseSendingService();
+		}
+		return responseSendingService;
+	}
+	
 	public void sendOKResponse(Socket socket, HttpServletResponseImpl response) throws IOException {
 
 		OutputStream os = socket.getOutputStream();
@@ -187,5 +204,54 @@ public class ResponseSendingService {
 
 		return;
 
+	}
+	
+	public void loadAppDefaultPage(HttpServletRequestImpl servletRequest, Socket socket) {
+
+		ServletContext servletContext = loadAppConfig(servletRequest);
+		
+		if(URIResolver.properDefaultAppPageRequest(servletRequest)) {
+			tryToLoadDefaultPage(socket, servletContext);
+		}
+		else {
+			String URI = URIResolver.getRequestURI(servletRequest);
+			String correctedURI = URIUtils.correctUnproperDefaultPageURI(URI);
+			tryToSendRedirectResponse(socket,  correctedURI);
+		}
+	}
+	
+	public void tryToServiceRequestUsingServlet(HttpServletRequestImpl servletRequest, Socket socket, RequestContent content) {
+		try {
+			
+			ServletContext servletContext = loadAppConfig(servletRequest);
+			
+			HttpServletResponseImpl servletResponse = new HttpServletResponseImpl();			
+			Servlet servlet = servletContext.getServletByUrlPattern(servletRequest.getRequestURI());
+			servlet.service(servletRequest, servletResponse);
+			
+			if (servletResponse.isRedirectResponse()) {
+				sendRedirectResponse(socket, servletResponse.getRedirectURL());
+			} else {
+				sendOKResponse(socket, servletResponse);
+			}
+
+		} catch (ServletException | IOException e) {
+			
+			logger.error("Could not service request using servlet.");
+			logger.error("Error message: " + e.getMessage());
+			
+			tryToSendInternalErrorResponse(socket);
+		}
+	}
+	
+	private ServletContext loadAppConfig(HttpServletRequestImpl servletRequest) {
+		String requestURI = URIResolver.getRequestURI(servletRequest);
+		for(String an : Configuration.applications.keySet()) {
+			//TODO change this condition. It can make some problems
+			if(requestURI.contains(an)) {
+				return Configuration.applications.get(an);
+			}
+		}
+		return null;
 	}
 }

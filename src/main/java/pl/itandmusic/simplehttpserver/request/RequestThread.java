@@ -3,36 +3,26 @@ package pl.itandmusic.simplehttpserver.request;
 import java.io.IOException;
 import java.net.Socket;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-
-import pl.itandmusic.simplehttpserver.configuration.Configuration;
 import pl.itandmusic.simplehttpserver.enummeration.RequestType;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
-import pl.itandmusic.simplehttpserver.model.HttpServletResponseImpl;
 import pl.itandmusic.simplehttpserver.model.RequestContent;
-import pl.itandmusic.simplehttpserver.model.ServletContext;
 import pl.itandmusic.simplehttpserver.response.ResponseSendingService;
-import pl.itandmusic.simplehttpserver.utils.URIResolver;
-import pl.itandmusic.simplehttpserver.utils.URIUtils;
 
 public class RequestThread implements Runnable {
 
 	private final Logger logger = Logger.getLogger(RequestThread.class);
 	private Socket socket;
 	private HttpServletRequestImpl servletRequest;
-	private HttpServletResponseImpl servletResponse;
 	private RequestContentReader requestContentReader;
 	private RequestContentConverter requestContentConverter;
 	private ResponseSendingService responseSendingService;
-	private ServletContext servletContext;
 
 	public RequestThread(Socket socket) {
 		this.socket = socket;
-		this.requestContentReader = new RequestContentReader();
-		this.requestContentConverter = new RequestContentConverter();
-		this.responseSendingService = new ResponseSendingService();
+		this.requestContentReader = RequestContentReader.getRequestContentReader();
+		this.requestContentConverter = RequestContentConverter.getRequestContentConverter();
+		this.responseSendingService = ResponseSendingService.getResponseSendingService();
 	}
 
 	@Override
@@ -44,16 +34,16 @@ public class RequestThread implements Runnable {
 			return;
 		}
 		
+		servletRequest = requestContentConverter.convert(content, socket);
+		
 		if (servletRequest.getRequestType().equals(RequestType.SERVER_INFO_REQUEST)) {
 			responseSendingService.tryToLoadServerPage(socket);
 		} 
 		else if(servletRequest.getRequestType().equals(RequestType.DEFAULT_APP_PAGE_REQUEST)) {
-			//maybe this method should be in service?
-			loadAppDefaultPage();
+			responseSendingService.loadAppDefaultPage(servletRequest, socket);
 		}
 		else if(servletRequest.getRequestType().equals(RequestType.APP_PAGE_REQUEST)){
-			//maybe this method should be in service?
-			tryToServiceRequestUsingServlet(content);
+			responseSendingService.tryToServiceRequestUsingServlet(servletRequest, socket, content);
 		}
 		else {
 			responseSendingService.tryToSendPageNotFoundResponse(socket);
@@ -61,45 +51,6 @@ public class RequestThread implements Runnable {
 		
 		tryToCloseSocket(socket);
 
-	}
-	
-	private void loadAppDefaultPage() {
-
-		loadAppConfig();
-		
-		if(URIResolver.properDefaultAppPageRequest(servletRequest)) {
-			responseSendingService.tryToLoadDefaultPage(socket, servletContext);
-		}
-		else {
-			String URI = URIResolver.getRequestURI(servletRequest);
-			String correctedURI = URIUtils.correctUnproperDefaultPageURI(URI);
-			responseSendingService.tryToSendRedirectResponse(socket,  correctedURI);
-		}
-	}
-	
-	private void tryToServiceRequestUsingServlet(RequestContent content) {
-		try {
-			
-			loadAppConfig();
-			
-			servletRequest = requestContentConverter.convert(content, socket);
-			servletResponse = new HttpServletResponseImpl();			
-			Servlet servlet = servletContext.getServletByUrlPattern(servletRequest.getRequestURI());
-			servlet.service(servletRequest, servletResponse);
-			
-			if (servletResponse.isRedirectResponse()) {
-				responseSendingService.sendRedirectResponse(socket, servletResponse.getRedirectURL());
-			} else {
-				responseSendingService.sendOKResponse(socket, servletResponse);
-			}
-
-		} catch (ServletException | IOException e) {
-			
-			logger.error("Could not service request using servlet.");
-			logger.error("Error message: " + e.getMessage());
-			
-			responseSendingService.tryToSendInternalErrorResponse(socket);
-		}
 	}
 
 	private void tryToCloseSocket(Socket socket) {
@@ -109,15 +60,6 @@ public class RequestThread implements Runnable {
 			logger.warn("Conuld not close socket");
 		}
 	}
-	
-	private void loadAppConfig() {
-		String requestURI = URIResolver.getRequestURI(servletRequest);
-		for(String an : Configuration.applications.keySet()) {
-			//TODO change this condition. It can make some problems
-			if(requestURI.contains(an)) {
-				this.servletContext = Configuration.applications.get(an);
-			}
-		}
-	}
+
 
 }

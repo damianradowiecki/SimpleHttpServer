@@ -28,6 +28,7 @@ import pl.itandmusic.simplehttpserver.utils.URIResolver;
 
 public class RequestContentConverter {
 
+	private static RequestContentConverter requestContentConverter;
 	private static final Logger logger = Logger.getLogger(WebConfigurationLoader.class);
 	private static final String PARAMS_DELIMITER = "&";
 	private static final String KEY_VALUE_DELIMITER = "=";
@@ -46,6 +47,17 @@ public class RequestContentConverter {
 	private ServletContext servletContext;
 	private RequestType requestType;
 
+	private RequestContentConverter() {}
+	
+	public static RequestContentConverter getRequestContentConverter() {
+		if(requestContentConverter == null) {
+			requestContentConverter = new RequestContentConverter();
+		}
+		return requestContentConverter;
+	}
+	
+	
+	
 	public HttpServletRequestImpl convert(RequestContent content, Socket socket) {
 
 		List<String> plainContent = content.getPlainContent();

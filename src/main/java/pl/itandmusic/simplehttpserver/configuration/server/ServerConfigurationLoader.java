@@ -23,10 +23,10 @@ public class ServerConfigurationLoader {
 
 		logger.info("Server configuration loading.");
 
-		Path serverXmlFilePath = resolveServerXmlFilePath();
+		Path serverConfigurationPath = resolveServerXmlFilePath();
 
-		if (Files.exists(serverXmlFilePath)) {
-			if(tryToLoadServerConfig(serverXmlFilePath.toFile())) {
+		if (Files.exists(serverConfigurationPath)) {
+			if(tryToLoadServerConfig(serverConfigurationPath.toFile())) {
 				Configuration.port = serverConfig.getPort();
 				Configuration.appsDirectory = serverConfig.getAppsDirectory();
 			}
@@ -47,10 +47,8 @@ public class ServerConfigurationLoader {
 	private static boolean tryToLoadServerConfig(File serverConfigFile) {
 		try {
 			JAXBContext context = JAXBContext.newInstance(ServerConfig.class);
-			Unmarshaller um;
-
-			um = context.createUnmarshaller();
-			serverConfig = (ServerConfig) um.unmarshal(new FileReader(serverConfigFile));
+			Unmarshaller unmarshaller = context.createUnmarshaller();
+			serverConfig = (ServerConfig) unmarshaller.unmarshal(new FileReader(serverConfigFile));
 			return true;
 		} catch (JAXBException | FileNotFoundException e) {
 			logger.info("Couldn't read server.xml file. Server can not run.");

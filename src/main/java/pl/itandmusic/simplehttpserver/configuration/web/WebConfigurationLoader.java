@@ -41,7 +41,7 @@ public class WebConfigurationLoader {
 
 		logger.info("Web configuration loading.");
 
-		loadAllAppFolderNames();
+		loadAppFolderNames();
 
 		addClassesDirectoriesToClasspath();
 		
@@ -51,7 +51,7 @@ public class WebConfigurationLoader {
 
 	}
 
-	private static void loadAllAppFolderNames() throws IOException {
+	private static void loadAppFolderNames() throws IOException {
 		DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(Configuration.appsDirectory));
 		for (Path path : directoryStream) {
 			if (Files.isDirectory(path)) {
@@ -62,8 +62,8 @@ public class WebConfigurationLoader {
 
 	}
 
-	private static void loadConfigurationForEveryApp() throws MalformedURLException, ClassNotFoundException,
-			FileNotFoundException, JAXBException, InstantiationException, IllegalAccessException {
+	private static void loadConfigurationForEveryApp() throws ClassNotFoundException,
+			JAXBException, InstantiationException, IllegalAccessException, IOException {
 
 		for (String fn : appFolderNames) {
 			loadAppConfiguration(fn);
@@ -94,8 +94,8 @@ public class WebConfigurationLoader {
 		addURLMethod.invoke(classLoader, classesURL);
 	}
 	
-	private static void loadAppConfiguration(String appFolderName) throws MalformedURLException, ClassNotFoundException,
-			FileNotFoundException, JAXBException, InstantiationException, IllegalAccessException {
+	private static void loadAppConfiguration(String appFolderName) throws ClassNotFoundException,
+			JAXBException, InstantiationException, IllegalAccessException, IOException {
 
 		ServletContext servletContext = new ServletContext();
 
@@ -170,7 +170,7 @@ public class WebConfigurationLoader {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void setServletMappings(ServletContext servletContext, WebApp webApp) throws MalformedURLException {
+	private static void setServletMappings(ServletContext servletContext, WebApp webApp) throws ClassNotFoundException, IOException {
 		for (ServletConfig sc : servletContext.getServletConfigs()) {
 			for (ServletMapping sm : webApp.getServletMappings()) {
 				if (sm.getServletName().equals(sc.getServletName())) {
@@ -195,7 +195,7 @@ public class WebConfigurationLoader {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void setListeners(ServletContext servletContext, WebApp webApp) throws MalformedURLException {
+	private static void setListeners(ServletContext servletContext, WebApp webApp) throws ClassNotFoundException, IOException {
 		for (Listener l : webApp.getListeners()) {
 			Class<? extends EventListener> clazz = (Class<? extends EventListener>) loadClassFromAppClassesFolder(
 					servletContext, l.getListenerClass());
@@ -217,25 +217,14 @@ public class WebConfigurationLoader {
 		}
 	}
 
-	private static Class<?> loadClassFromAppClassesFolder(ServletContext servletContext, String urlPattern){
+	private static Class<?> loadClassFromAppClassesFolder(ServletContext servletContext, String urlPattern) throws ClassNotFoundException, IOException{
 		URLClassLoader classLoader = null;
-		try {
 			Path path = Paths.get(Configuration.appsDirectory, servletContext.getServletContextName(), "WEB-INF", "classes");
 			URL url = path.toUri().toURL();
 			classLoader = new URLClassLoader(new URL[] { url });
-			return classLoader.loadClass(urlPattern);
-		} catch (ClassNotFoundException | MalformedURLException e) {
-			// TODO cos z tym trzeba zrobic
-			// chyba trzeba pociagnac te wyjatki w gore
-			e.printStackTrace();
-			return null;
-		} finally {
-			try {
-				classLoader.close();
-			} catch (Exception e) {
-				logger.warn("Class loader is not closed.");
-			}
-		}
+			Class<?> clazz = classLoader.loadClass(urlPattern);
+			classLoader.close();
+			return clazz;
 	}
 
 }

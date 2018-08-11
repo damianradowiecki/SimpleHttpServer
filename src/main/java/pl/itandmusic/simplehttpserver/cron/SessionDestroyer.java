@@ -42,7 +42,7 @@ class SessionDestroyerAction implements Runnable{
 	@Override
 	public void run() {
 		for(HttpSession session : sessionManager.sessions) {
-			if(System.currentTimeMillis() - session.getLastAccessedTime() > maxSessionInactiveInMinutesPeriod * 60 * 1000) {
+			if(maxSessionInactiveInMinutesPeriod != 0 && System.currentTimeMillis() - session.getLastAccessedTime() > maxSessionInactiveInMinutesPeriod * 60 * 1000) {
 				String sessionId = session.getId();
 				sessionManager.destorySession(session);
 				logger.info("Destroyed session with id " + sessionId);

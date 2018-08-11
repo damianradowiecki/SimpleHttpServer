@@ -13,6 +13,8 @@ import pl.itandmusic.simplehttpserver.model.RequestContent;
 
 public class RequestContentReader {
 
+	
+	private static RequestContentReader requestContentReader;
 	private static final Logger logger = Logger.getLogger(WebConfigurationLoader.class);
 	private Socket socket;
 	private InputStreamReader inputStreamReader;
@@ -20,6 +22,15 @@ public class RequestContentReader {
 	private RequestContent content = new RequestContent();
 	private List<String> plainContent = new ArrayList<>();
 	private String postData = "";
+	
+	private RequestContentReader() {}
+	
+	public static RequestContentReader getRequestContentReader() {
+		if(requestContentReader == null) {
+			requestContentReader = new RequestContentReader();
+		}
+		return requestContentReader;
+	}
 
 	public RequestContent read(Socket socket) {
 		this.socket = socket;
