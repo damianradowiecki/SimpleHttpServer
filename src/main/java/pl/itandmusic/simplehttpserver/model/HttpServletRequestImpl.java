@@ -117,7 +117,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
-	public Enumeration getLocales() {
+	public Enumeration<Locale> getLocales() {
 		// Accept-Language header values
 		return null;
 	}
@@ -133,9 +133,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	}
 
 	@Override
-	public Enumeration getParameterNames() {
-		// TODO Auto-generated method stub
-		return null;
+	public Enumeration<String> getParameterNames() {
+		return new EnumerationImpl<>(parameters.keySet());
 	}
 
 	@Override

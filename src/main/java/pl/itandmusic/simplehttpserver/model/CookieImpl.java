@@ -28,6 +28,5 @@ public class CookieImpl extends Cookie {
 	public void setValue(String value) {
 		this.value = value;
 	}
-
 	
 }

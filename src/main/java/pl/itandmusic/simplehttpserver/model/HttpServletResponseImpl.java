@@ -3,7 +3,6 @@ package pl.itandmusic.simplehttpserver.model;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -13,6 +12,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import pl.itandmusic.simplehttpserver.buffer.ResponseOutputStreamBuffer;
+import pl.itandmusic.simplehttpserver.utils.CookieConverter;
 
 public class HttpServletResponseImpl implements HttpServletResponse {
 
@@ -118,9 +118,9 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	}
 
 	@Override
-	public void addCookie(Cookie arg0) {
-		// TODO Auto-generated method stub
-
+	public void addCookie(Cookie cookie) {
+		Pair<String, String> pair = CookieConverter.convertToKeyValuePair(cookie);
+		addHeader(pair.getKey(), pair.getValue());
 	}
 
 	@Override
