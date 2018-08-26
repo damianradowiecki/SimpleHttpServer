@@ -119,4 +119,14 @@ public class HttpSessionImpl implements HttpSession {
 		return this.id.hashCode();
 	}
 
+	@Override
+	public boolean equals(Object object) {
+		if(object instanceof HttpSession) {
+			HttpSession session = (HttpSession) object;
+			return session.getId().equals(this.id);
+		}
+		else {
+			return false;
+		}
+	}
 }

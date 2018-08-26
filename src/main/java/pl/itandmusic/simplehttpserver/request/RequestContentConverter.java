@@ -32,20 +32,6 @@ public class RequestContentConverter {
 	private static final Logger logger = Logger.getLogger(WebConfigurationLoader.class);
 	private static final String PARAMS_DELIMITER = "&";
 	private static final String KEY_VALUE_DELIMITER = "=";
-	private Pattern pattern;
-	private Matcher matcher;
-	private HttpMethod httpMethod;
-	private String protocol;
-	private URI requestURI;
-	private StringBuffer requestURL;
-	private String queryString;
-	private Map<String, String> headers;
-	private Enumeration<String> headerNames;
-	private String remoteAddress;
-	private ServletInputStream servletInputStream;
-	private Map<String, String> parameters;
-	private ServletContext servletContext;
-	private RequestType requestType;
 
 	private RequestContentConverter() {}
 	
@@ -58,22 +44,22 @@ public class RequestContentConverter {
 	
 	
 	
-	public HttpServletRequestImpl convert(RequestContent content, Socket socket) {
+	public synchronized HttpServletRequestImpl convert(RequestContent content, Socket socket) {
 
 		List<String> plainContent = content.getPlainContent();
 		
-		httpMethod = extractHttpMethod(plainContent);
-		protocol = extractProtocol(plainContent);
-		requestURI = extractURI(plainContent);
-		requestURL = extractURL(plainContent);
-		queryString = extractQueryString(plainContent);
-		headers = extractHeaders(plainContent);
-		headerNames = extractHeaderNames(plainContent);
-		remoteAddress = extractRemoteHost(socket);
-		servletInputStream = new ServletInputStreamImpl(socket);
-		parameters = extractParameters(content, httpMethod);
-		servletContext = URIResolver.anyAppRequest(requestURI);
-		requestType = determineRequestType(requestURI, servletContext);
+		HttpMethod httpMethod = extractHttpMethod(plainContent);
+		String protocol = extractProtocol(plainContent);
+		URI requestURI = extractURI(plainContent);
+		StringBuffer requestURL = extractURL(plainContent);
+		String queryString = extractQueryString(plainContent);
+		Map<String, String> headers = extractHeaders(plainContent);
+		Enumeration<String> headerNames = extractHeaderNames(plainContent);
+		String remoteAddress = extractRemoteHost(socket);
+		ServletInputStream servletInputStream = new ServletInputStreamImpl(socket);
+		Map<String, String> parameters = extractParameters(content, httpMethod);
+		ServletContext servletContext = URIResolver.anyAppRequest(requestURI);
+		RequestType requestType = determineRequestType(requestURI, servletContext);
 		HttpServletRequestImpl.Builder builder = HttpServletRequestImpl.Builder.newBuilder();
 
 		return builder
@@ -147,10 +133,10 @@ public class RequestContentConverter {
 	Map<String, String> extractHeaders(List<String> content) {
 		Map<String, String> headers = new HashMap<>();
 
-		pattern = Pattern.compile("(?<NAME>.+?):(?<VALUES>(.+?,.+?)*)");
+		Pattern pattern = Pattern.compile("(?<NAME>.+?):(?<VALUES>(.+?,?)*)");
 
 		for (String s : content) {
-			matcher = pattern.matcher(s);
+			Matcher matcher = pattern.matcher(s);
 			if (matcher.matches()) {
 				String headerName = matcher.group("NAME");
 				headers.put(headerName, matcher.group("VALUES"));
@@ -163,17 +149,17 @@ public class RequestContentConverter {
 		
 		List<String> names = new ArrayList<>();
 		
-		pattern = Pattern.compile("(?<NAME>.+?):(.+?,?)*");
+		Pattern pattern = Pattern.compile("(?<NAME>.+?):(.+?,?)*");
 
 		for (String s : content) {
-			matcher = pattern.matcher(s);
+			Matcher matcher = pattern.matcher(s);
 			if (matcher.matches()) {
 				String headerName = matcher.group("NAME");
 				names.add(headerName);
 			}
 		}
 		
-		return new EnumerationImpl<String>(names);
+		return new EnumerationImpl<>(names);
 	}
 	
 	String extractRemoteHost(Socket socket) {
@@ -194,8 +180,8 @@ public class RequestContentConverter {
 	Map<String, String> extractParameters(List<String> content) {
 		Map<String, String> result = new HashMap<>();
 		String requestFirstLine = content.get(0);
-		pattern = Pattern.compile("^.*?\\?(?<PARAMS>.*?)\\s.*$");
-		matcher = pattern.matcher(requestFirstLine);
+		Pattern pattern = Pattern.compile("^.*?\\?(?<PARAMS>.*?)\\s.*$");
+		Matcher matcher = pattern.matcher(requestFirstLine);
 		if(matcher.matches()) {
 			String paramsInOneString = matcher.group("PARAMS").trim();
 			Map<String, String> params = extractParameters(paramsInOneString);

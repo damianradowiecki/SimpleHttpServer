@@ -26,7 +26,7 @@ public class RequestThread implements Runnable {
 	}
 
 	@Override
-	public void run() {
+	public synchronized void run() {
 
 		RequestContent content = requestContentReader.read(socket);
 		

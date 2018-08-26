@@ -14,18 +14,22 @@ public class Server {
 	
 	public static void start() throws IOException {
 		
-		ServerSocket serverSocket = new ServerSocket(Configuration.port);
-		
 		logger.info("Server started.");
 		
-		while(!serverSocket.isClosed()) {
-			Socket socket = serverSocket.accept();	
-			new Thread(new RequestThread(socket)).start();
+		try (ServerSocket serverSocket = new ServerSocket(Configuration.port)){
+			while(!serverSocket.isClosed()) {
+				Socket socket = serverSocket.accept();	
+				new Thread(new RequestThread(socket)).start();
+			}
+		}catch(IOException exception) {
+			logger.error("Server stopped");
+			logger.error("Error message: " + exception.getMessage());
+		}finally {
+			logger.info("Server stopped.");
 		}
 		
-		serverSocket.close();
 		
-		logger.info("Server stopped.");
+		
 		
 		
 		

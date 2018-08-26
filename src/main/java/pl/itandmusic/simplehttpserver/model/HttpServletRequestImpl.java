@@ -343,11 +343,12 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 			SessionManager sessionManager = servletContext.getSessionManager();
 			Optional<String> optionalSessionId = CookieService.getSessionId(getCookies());
 			if(optionalSessionId.isPresent()) {
-				return sessionManager.getSessionById(optionalSessionId.get()).get();
+				Optional<HttpSession> httpSession = sessionManager.getSessionById(optionalSessionId.get());
+				if(httpSession.isPresent()) {
+					return httpSession.get();
+				}
 			}
-			else {
-				return null;
-			}
+			return null;
 		}
 
 	}

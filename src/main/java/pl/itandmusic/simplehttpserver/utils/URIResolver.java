@@ -70,10 +70,9 @@ public class URIResolver {
 	
 	public static ServletContext anyAppRequest(String requestURI) {
 		for (ServletContext sc : Configuration.applications.values()) {
-			for (ServletConfig sConf : sc.getServletConfigs()) {
-				if (sConf.getServletMappings().keySet().contains(requestURI)) {
-					return sc;
-				}
+			String appRequestPrefix = "/" + sc.getServletContextName();
+			if(requestURI.startsWith(appRequestPrefix)) {
+				return sc;
 			}
 		}
 		return null;

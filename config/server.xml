@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <server-config>
-	<port>1500</port>
+	<port>9999</port>
 	<apps-directory>/home/damian/eclipse-workspace/Other/SimpleHttpServer/webapp</apps-directory>
 </server-config>

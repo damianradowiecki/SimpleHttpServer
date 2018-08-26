@@ -11,7 +11,7 @@ public class Servlet {
 
 	private String servletName;
 	private String servletClass;
-	private List<InitParam> initParams = new ArrayList<>();
+	private List<Param> initParams = new ArrayList<>();
 
 	@XmlElement(name = "servlet-name")
 	public String getServletName() {
@@ -32,11 +32,11 @@ public class Servlet {
 	}
 
 	@XmlElement(name = "init-param")
-	public List<InitParam> getInitParams() {
+	public List<Param> getInitParams() {
 		return initParams;
 	}
 
-	public void setInitParams(List<InitParam> initParams) {
+	public void setInitParams(List<Param> initParams) {
 		this.initParams = initParams;
 	}
 	

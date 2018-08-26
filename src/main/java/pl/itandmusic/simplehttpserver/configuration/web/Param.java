@@ -3,12 +3,9 @@ package pl.itandmusic.simplehttpserver.configuration.web;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "init-param")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class InitParam {
-
+public class Param {
 	@XmlElement(name = "param-name")
 	private String name;
 	@XmlElement(name = "param-value")
@@ -29,5 +26,4 @@ public class InitParam {
 	public void setValue(String value) {
 		this.value = value;
 	}
-
 }

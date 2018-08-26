@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -68,7 +69,6 @@ public class ResponseSendingService {
 		} catch (IOException e) {
 			logger.warn("Could not send redirect response to " + redirectURL);
 			logger.logException(e, LogLevel.WARN);
-			e.printStackTrace();
 		}
 	}
 
@@ -143,29 +143,34 @@ public class ResponseSendingService {
 	public void loadDefaultPage(Socket socket, ServletContext servletContext) throws IOException {
 		String appDirectory = servletContext.getAppPath();
 		Path path = Paths.get(appDirectory);
-		if (Files.exists(path)) {
+		if (path.toFile().exists()) {
 			for (String dp : servletContext.getDefaultPages()) {
 				Path page = Paths.get(dp);
 				Path fullPath = path.resolve(page);
-				if (Files.exists(fullPath)) {
-					BufferedReader reader = new BufferedReader(new FileReader(fullPath.toFile()));
-					OutputStream os = socket.getOutputStream();
-					PrintWriter writer = new PrintWriter(os);
-
-					writer.println("HTTP/1.1 200 OK");
-					writer.println("Content-Type: text/html");
-					writer.println();
-
-					String line;
-					while ((line = reader.readLine()) != null) {
-						writer.println(line);
+				if (fullPath.toFile().exists()) {
+					try (FileReader fileReader = new FileReader(fullPath.toFile())){
+						BufferedReader reader = new BufferedReader(fileReader);
+						OutputStream os = socket.getOutputStream();
+						PrintWriter writer = new PrintWriter(os);
+	
+						writer.println("HTTP/1.1 200 OK");
+						writer.println("Content-Type: text/html");
+						writer.println();
+	
+						String line;
+						while ((line = reader.readLine()) != null) {
+							writer.println(line);
+						}
+						writer.flush();
+						writer.close();
+	
+						reader.close();
+						fileReader.close();
+	
+						return;
+					}catch(IOException exception) {
+						//TODO handling this exception
 					}
-					writer.flush();
-					writer.close();
-
-					reader.close();
-
-					return;
 				}
 			}
 		}
@@ -208,10 +213,10 @@ public class ResponseSendingService {
 	
 	public void loadAppDefaultPage(HttpServletRequestImpl servletRequest, Socket socket) {
 
-		ServletContext servletContext = loadAppConfig(servletRequest);
+		Optional<ServletContext> optionalServletContext = loadAppConfig(servletRequest);
 		
-		if(URIResolver.properDefaultAppPageRequest(servletRequest)) {
-			tryToLoadDefaultPage(socket, servletContext);
+		if(URIResolver.properDefaultAppPageRequest(servletRequest) && optionalServletContext.isPresent()) {
+			tryToLoadDefaultPage(socket, optionalServletContext.get());
 		}
 		else {
 			String URI = URIResolver.getRequestURI(servletRequest);
@@ -223,17 +228,23 @@ public class ResponseSendingService {
 	public void tryToServiceRequestUsingServlet(HttpServletRequestImpl servletRequest, Socket socket, RequestContent content) {
 		try {
 			
-			ServletContext servletContext = loadAppConfig(servletRequest);
+			Optional<ServletContext> optionalServletContext = loadAppConfig(servletRequest);
 			
-			HttpServletResponseImpl servletResponse = new HttpServletResponseImpl();			
-			Servlet servlet = servletContext.getServletByUrlPattern(servletRequest.getRequestURI());
-			servlet.service(servletRequest, servletResponse);
-			
-			if (servletResponse.isRedirectResponse()) {
-				sendRedirectResponse(socket, servletResponse.getRedirectURL());
-			} else {
-				sendOKResponse(socket, servletResponse);
+			if(optionalServletContext.isPresent()) {
+				HttpServletResponseImpl servletResponse = new HttpServletResponseImpl();			
+				Servlet servlet = optionalServletContext.get().getServletByUrlPattern(servletRequest.getRequestURI());
+				servlet.service(servletRequest, servletResponse);
+				
+				if (servletResponse.isRedirectResponse()) {
+					sendRedirectResponse(socket, servletResponse.getRedirectURL());
+				} else {
+					sendOKResponse(socket, servletResponse);
+				}
 			}
+			else {
+				throw new RuntimeException("Cannot find servlet context for request: " + servletRequest);
+			}
+			
 
 		} catch (ServletException | IOException e) {
 			
@@ -244,14 +255,15 @@ public class ResponseSendingService {
 		}
 	}
 	
-	private ServletContext loadAppConfig(HttpServletRequestImpl servletRequest) {
+	private Optional<ServletContext> loadAppConfig(HttpServletRequestImpl servletRequest) {
 		String requestURI = URIResolver.getRequestURI(servletRequest);
 		for(String an : Configuration.applications.keySet()) {
 			//TODO change this condition. It can make some problems
 			if(requestURI.contains(an)) {
-				return Configuration.applications.get(an);
+				ServletContext servletContext = Configuration.applications.get(an);
+				return Optional.ofNullable(servletContext);
 			}
 		}
-		return null;
+		return Optional.empty();
 	}
 }

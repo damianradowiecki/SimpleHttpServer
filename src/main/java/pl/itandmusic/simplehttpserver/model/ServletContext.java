@@ -164,7 +164,7 @@ public class ServletContext implements javax.servlet.ServletContext {
 		try {
 			initServlet(servletConfig);
 		} catch (InstantiationException | IllegalAccessException | ServletException | ClassNotFoundException e) {
-			e.printStackTrace();
+			logger.logException("Initializing servlet", e, LogLevel.ERROR);
 		}
 	}
 

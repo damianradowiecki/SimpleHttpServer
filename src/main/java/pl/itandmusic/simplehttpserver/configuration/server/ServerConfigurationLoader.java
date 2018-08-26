@@ -3,7 +3,6 @@ package pl.itandmusic.simplehttpserver.configuration.server;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -19,13 +18,16 @@ public class ServerConfigurationLoader {
 	private static final Logger logger = Logger.getLogger(ServerConfigurationLoader.class);
 	private static ServerConfig serverConfig;
 
-	public static void load() throws JAXBException, FileNotFoundException {
+	
+	private ServerConfigurationLoader() {}
+	
+	public static void load(){
 
 		logger.info("Server configuration loading.");
 
 		Path serverConfigurationPath = resolveServerXmlFilePath();
-
-		if (Files.exists(serverConfigurationPath)) {
+		
+		if(serverConfigurationPath.toFile().exists()) {
 			if(tryToLoadServerConfig(serverConfigurationPath.toFile())) {
 				Configuration.port = serverConfig.getPort();
 				Configuration.appsDirectory = serverConfig.getAppsDirectory();
@@ -40,8 +42,7 @@ public class ServerConfigurationLoader {
 
 	private static Path resolveServerXmlFilePath() {
 		Path rootPath = Paths.get("");
-		Path serverXmlFilePath = rootPath.resolve("config").resolve("server.xml");
-		return serverXmlFilePath;
+		return rootPath.resolve("config").resolve("server.xml");
 	}
 
 	private static boolean tryToLoadServerConfig(File serverConfigFile) {

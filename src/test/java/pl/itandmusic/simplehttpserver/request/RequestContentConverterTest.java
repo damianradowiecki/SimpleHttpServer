@@ -30,7 +30,7 @@ public class RequestContentConverterTest {
 
 	@BeforeClass
 	public static void prepare() {
-		requestContentConverter = new RequestContentConverter();
+		requestContentConverter = RequestContentConverter.getRequestContentConverter();
 	}
 
 	@Before

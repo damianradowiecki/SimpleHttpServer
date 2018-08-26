@@ -6,8 +6,12 @@ import java.net.Socket;
 
 import javax.servlet.ServletInputStream;
 
+import pl.itandmusic.simplehttpserver.logger.LogLevel;
+import pl.itandmusic.simplehttpserver.logger.Logger;
+
 public class ServletInputStreamImpl extends ServletInputStream {
 
+	private static final Logger logger = Logger.getLogger(ServletInputStreamImpl.class);
 	private InputStream inputStream;
 	
 	
@@ -15,7 +19,7 @@ public class ServletInputStreamImpl extends ServletInputStream {
 		try {
 			inputStream = clietnSocket.getInputStream();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.logException("ServletInputStreamImpl - constructor", e, LogLevel.ERROR);
 		}
 	}
 	

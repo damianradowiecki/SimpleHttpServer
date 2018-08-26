@@ -1,8 +1,6 @@
 package pl.itandmusic.simplehttpserver.buffer;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 

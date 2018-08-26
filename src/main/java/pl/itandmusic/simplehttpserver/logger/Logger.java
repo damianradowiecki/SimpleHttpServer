@@ -39,6 +39,10 @@ public class Logger {
 	public void logException(Exception exception, LogLevel logLevel) {
 		log("Error message: " + exception.getMessage(), logLevel);
 	}
+	
+	public void logException(String context, Exception exception, LogLevel logLevel) {
+		log("Error thrown in context " + context + ". Error message: " + exception.getMessage(), logLevel);
+	}
 
 	private String prepareDateString() {
 		return logDateFormat.format(Calendar.getInstance().getTime());

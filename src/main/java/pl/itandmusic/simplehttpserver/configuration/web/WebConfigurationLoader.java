@@ -37,7 +37,7 @@ public class WebConfigurationLoader {
 	private static final int DEFAULT_SESSION_TIMEOUT = 30;
 
 	public static void load()
-			throws IOException, ClassNotFoundException, JAXBException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
+			throws IOException, ClassNotFoundException, JAXBException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 
 		logger.info("Web configuration loading.");
 
@@ -59,6 +59,7 @@ public class WebConfigurationLoader {
 				appFolderNames.add(folderName);
 			}
 		}
+		directoryStream.close();
 
 	}
 
@@ -71,21 +72,21 @@ public class WebConfigurationLoader {
 
 	}
 
-	private static void addClassesDirectoriesToClasspath() throws MalformedURLException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+	private static void addClassesDirectoriesToClasspath() throws MalformedURLException, NoSuchMethodException, IllegalAccessException, InvocationTargetException{
 		for (String fn : appFolderNames) {
 			addClassesDirectoryToClasspath(fn);
 		}
 	}
 	
-	private static void addClassesDirectoryToClasspath(String appFolderName) throws MalformedURLException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private static void addClassesDirectoryToClasspath(String appFolderName) throws MalformedURLException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		Path pathToClasses = Paths.get(Configuration.appsDirectory, appFolderName, "WEB-INF", "classes");
-		
-		if(Files.exists(pathToClasses)) {
+
+		if(pathToClasses.toFile().exists()) {
 			addClassesDirectoryToClasspath(pathToClasses);
 		}
 	}
 	
-	private static void addClassesDirectoryToClasspath(Path path) throws MalformedURLException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private static void addClassesDirectoryToClasspath(Path path) throws MalformedURLException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		URL classesURL = path.toFile().toURI().toURL();
 		URLClassLoader classLoader = (URLClassLoader)ClassLoader.getSystemClassLoader();
 		Class<URLClassLoader> urlClassLoaderClass = URLClassLoader.class;
@@ -102,6 +103,8 @@ public class WebConfigurationLoader {
 		WebApp webApp = unmarshalWebXml(appFolderName);
 
 		setAppName(servletContext, webApp, appFolderName);
+		
+		setAppPath(servletContext, appFolderName);
 
 		setDefaultAppPages(servletContext, webApp);
 
@@ -122,10 +125,10 @@ public class WebConfigurationLoader {
 	}
 
 	private static WebApp unmarshalWebXml(String appFolder)
-			throws MalformedURLException, ClassNotFoundException, FileNotFoundException, JAXBException {
-		File webXml = new File(Configuration.appsDirectory + "/" + appFolder + "/WEB-INF/web.xml");
-		if (webXml.exists()) {
-			return unmarshalWebXml(webXml);
+			throws MalformedURLException, FileNotFoundException, JAXBException {
+		Path path = Paths.get(Configuration.appsDirectory, appFolder, "WEB-INF", "web.xml");
+		if (path.toFile().exists()) {
+			return unmarshalWebXml(path.toFile());
 		} else {
 			throw new FileNotFoundException("Cannot find web.xml file");
 		}
@@ -141,13 +144,17 @@ public class WebConfigurationLoader {
 		String appName = webApp.getDisplayName() != null ? webApp.getDisplayName() : folderName;
 		servletContext.setServletContextName(appName);
 	}
+	
+	private static void setAppPath(ServletContext servletContext, String appFolderName) {
+		servletContext.setAppPath(Configuration.appsDirectory + File.separator + appFolderName);
+	}
 
 	private static void setDefaultAppPages(ServletContext servletContext, WebApp webApp) {
 		servletContext.setDefaultPages(webApp.getWelcomeFiles());
 	}
 
 	private static void setContextParams(ServletContext servletContext, WebApp webApp) {
-		for (ContextParam cp : webApp.getContextParams()) {
+		for (Param cp : webApp.getContextParams()) {
 			servletContext.getInitParameters().put(cp.getName(), cp.getValue());
 		}
 	}
@@ -164,7 +171,7 @@ public class WebConfigurationLoader {
 
 	private static void setServletInitParams(Servlet servlet, ServletConfig servletConfig) {
 		Map<String, String> initParams = servletConfig.getInitParams();
-		for (InitParam ip : servlet.getInitParams()) {
+		for (Param ip : servlet.getInitParams()) {
 			initParams.put(ip.getName(), ip.getValue());
 		}
 	}
@@ -208,7 +215,7 @@ public class WebConfigurationLoader {
 			throws InstantiationException, IllegalAccessException {
 		for (Class<? extends EventListener> l : servletContext.getListeners()) {
 			for (Class<?> i : l.getInterfaces()) {
-				if (i.getName().equals("javax.servlet.ServletContextListener")) {
+				if (i == ServletContextListener.class) {
 					ServletContextListener servletContextListener = ServletContextListener.class.cast(l.newInstance());
 					ServletContextEvent servletContextEvent = new ServletContextEvent(servletContext);
 					servletContextListener.contextInitialized(servletContextEvent);
@@ -217,14 +224,25 @@ public class WebConfigurationLoader {
 		}
 	}
 
-	private static Class<?> loadClassFromAppClassesFolder(ServletContext servletContext, String urlPattern) throws ClassNotFoundException, IOException{
-		URLClassLoader classLoader = null;
-			Path path = Paths.get(Configuration.appsDirectory, servletContext.getServletContextName(), "WEB-INF", "classes");
-			URL url = path.toUri().toURL();
-			classLoader = new URLClassLoader(new URL[] { url });
-			Class<?> clazz = classLoader.loadClass(urlPattern);
-			classLoader.close();
-			return clazz;
+	private static Class<?> loadClassFromAppClassesFolder(ServletContext servletContext, String urlPattern) throws IOException, ClassNotFoundException{
+		Path path = Paths.get(Configuration.appsDirectory, servletContext.getServletContextName(), "WEB-INF", "classes");
+		URL url = path.toUri().toURL();
+		try (URLClassLoader classLoader = new URLClassLoader(new URL[] { url });){
+			return classLoader.loadClass(urlPattern);
+		}
+		catch(ClassNotFoundException exception){
+			//TODO handling exception
+			//Think about this. try catch finally block lets closing class loader even if exception is thrown
+			//?? Should i rethrow this exception
+			throw exception;
+		}
+		catch(IOException exception_) {
+			//TODO handling exception
+			//Think about this. try catch finally block lets closing class loader even if exception is thrown
+			//?? Should i rethrow this exception
+			throw exception_;
+		}
+			
 	}
 
 }

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pl.itandmusic.simplehttpserver.configuration.web.WebConfigurationLoader;
+import pl.itandmusic.simplehttpserver.logger.LogLevel;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.RequestContent;
 
@@ -45,7 +46,7 @@ public class RequestContentReader {
 			content.setPOSTData(postData);
 
 		} catch (IOException ioException) {
-			ioException.printStackTrace();
+			logger.logException("RequestContentReader - read(Socket socket)", ioException, LogLevel.ERROR);
 		}
 
 		return content;
@@ -61,7 +62,7 @@ public class RequestContentReader {
 			}
 
 		} catch (IOException ioException) {
-			ioException.printStackTrace();
+			logger.logException("RequestContentReader - readPlainContent()", ioException, LogLevel.ERROR);
 		}
 
 	}
@@ -71,14 +72,14 @@ public class RequestContentReader {
 			int contentLengthHeaderValue = -1;
 
 			for (String line : plainContent) {
-				if (hasContentLengthHeader(line)) {
+				if (line != null && hasContentLengthHeader(line)) {
 					contentLengthHeaderValue = getContentLengthValue(line);
 					break;
 				}
 			}
 			postData = readPostData(bufferedReader, contentLengthHeaderValue);
 		} catch (IOException ioException) {
-			ioException.printStackTrace();
+			logger.logException("RequestContentReader - readPostData()", ioException, LogLevel.ERROR);
 		}
 	}
 

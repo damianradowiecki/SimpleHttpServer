@@ -24,7 +24,7 @@ class WebApp {
 	private List<ServletMapping> servletMappings = new ArrayList<>();
 
 	@XmlElement(name = "context-param")
-	private List<ContextParam> contextParams = new ArrayList<>();
+	private List<Param> contextParams = new ArrayList<>();
 
 	@XmlElementWrapper(name = "welcome-file-list")
 	@XmlElement(name = "welcome-file")
@@ -92,11 +92,11 @@ class WebApp {
 		this.version = version;
 	}
 
-	public List<ContextParam> getContextParams() {
+	public List<Param> getContextParams() {
 		return contextParams;
 	}
 
-	public void setContextParams(List<ContextParam> contextParams) {
+	public void setContextParams(List<Param> contextParams) {
 		this.contextParams = contextParams;
 	}
 

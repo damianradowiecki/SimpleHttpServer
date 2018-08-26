@@ -16,6 +16,8 @@ public class SessionDestroyer {
 
 	public static final int SESSION_TIMEOUT_CHECKING_IN_MINUTES_PERIOD = 1;
 	
+	private SessionDestroyer() {}
+	
 	public static void start() {
 		for(ServletContext sc : Configuration.applications.values()) {
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
