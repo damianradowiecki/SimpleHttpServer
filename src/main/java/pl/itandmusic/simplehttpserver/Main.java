@@ -13,7 +13,6 @@ import pl.itandmusic.simplehttpserver.server.Server;
 public class Main {
 
 	public static void main(String[] args) throws JAXBException, ClassNotFoundException, IOException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-		
 		ServerConfigurationLoader.load();
 		WebConfigurationLoader.load();
 		SessionDestroyer.start();

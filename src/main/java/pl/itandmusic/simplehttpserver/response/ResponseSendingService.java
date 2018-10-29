@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.Socket;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -39,7 +38,7 @@ public class ResponseSendingService {
 		return responseSendingService;
 	}
 	
-	public void sendOKResponse(Socket socket, HttpServletResponseImpl response) throws IOException {
+	public synchronized void sendOKResponse(Socket socket, HttpServletResponseImpl response) throws IOException {
 
 		OutputStream os = socket.getOutputStream();
 		PrintWriter writer = new PrintWriter(os);
@@ -63,7 +62,7 @@ public class ResponseSendingService {
 
 	}
 
-	public void tryToSendRedirectResponse(Socket socket, String redirectURL) {
+	public synchronized void tryToSendRedirectResponse(Socket socket, String redirectURL) {
 		try {
 			sendRedirectResponse(socket, redirectURL);
 		} catch (IOException e) {
@@ -72,7 +71,7 @@ public class ResponseSendingService {
 		}
 	}
 
-	public void sendRedirectResponse(Socket socket, String redirectURL) throws IOException {
+	public synchronized void sendRedirectResponse(Socket socket, String redirectURL) throws IOException {
 		OutputStream os = socket.getOutputStream();
 
 		String mainHeader = "HTTP/1.1 302 Found";
@@ -88,7 +87,7 @@ public class ResponseSendingService {
 
 	}
 
-	public void tryToSendInternalErrorResponse(Socket socket) {
+	public synchronized void tryToSendInternalErrorResponse(Socket socket) {
 		try {
 			sendInternalErrorResponse(socket);
 		} catch (IOException e) {
@@ -97,7 +96,7 @@ public class ResponseSendingService {
 		}
 	}
 
-	public void sendInternalErrorResponse(Socket socket) throws IOException {
+	public synchronized void sendInternalErrorResponse(Socket socket) throws IOException {
 		OutputStream os = socket.getOutputStream();
 
 		String error500Header = "HTTP/1.1 500 Internal Server Error";
@@ -110,7 +109,7 @@ public class ResponseSendingService {
 
 	}
 
-	public void tryToSendPageNotFoundResponse(Socket socket) {
+	public synchronized void tryToSendPageNotFoundResponse(Socket socket) {
 		try {
 			sendPageNotFoundResponse(socket);
 		} catch (IOException e) {
@@ -119,7 +118,7 @@ public class ResponseSendingService {
 		}
 	}
 
-	public void sendPageNotFoundResponse(Socket socket) throws IOException {
+	public synchronized void sendPageNotFoundResponse(Socket socket) throws IOException {
 		OutputStream os = socket.getOutputStream();
 
 		String error500Header = "HTTP/1.1 404 Not Found";
@@ -131,7 +130,7 @@ public class ResponseSendingService {
 		os.close();
 	}
 
-	public void tryToLoadDefaultPage(Socket socket, ServletContext servletContext) {
+	public synchronized void tryToLoadDefaultPage(Socket socket, ServletContext servletContext) {
 		try {
 			loadDefaultPage(socket, servletContext);
 		} catch (IOException e) {
@@ -140,7 +139,7 @@ public class ResponseSendingService {
 		}
 	}
 
-	public void loadDefaultPage(Socket socket, ServletContext servletContext) throws IOException {
+	public synchronized void loadDefaultPage(Socket socket, ServletContext servletContext) throws IOException {
 		String appDirectory = servletContext.getAppPath();
 		Path path = Paths.get(appDirectory);
 		if (path.toFile().exists()) {
@@ -169,6 +168,7 @@ public class ResponseSendingService {
 	
 						return;
 					}catch(IOException exception) {
+						exception.printStackTrace();
 						//TODO handling this exception
 					}
 				}
@@ -177,7 +177,7 @@ public class ResponseSendingService {
 
 	}
 
-	public void tryToLoadServerPage(Socket socket) {
+	public synchronized void tryToLoadServerPage(Socket socket) {
 		try {
 			loadServerPage(socket);
 			;
@@ -187,7 +187,7 @@ public class ResponseSendingService {
 		}
 	}
 
-	public void loadServerPage(Socket socket) throws IOException {
+	public synchronized void loadServerPage(Socket socket) throws IOException {
 
 		OutputStream os = socket.getOutputStream();
 		PrintWriter writer = new PrintWriter(os);
@@ -211,7 +211,7 @@ public class ResponseSendingService {
 
 	}
 	
-	public void loadAppDefaultPage(HttpServletRequestImpl servletRequest, Socket socket) {
+	public synchronized void loadAppDefaultPage(HttpServletRequestImpl servletRequest, Socket socket) {
 
 		Optional<ServletContext> optionalServletContext = loadAppConfig(servletRequest);
 		
@@ -221,11 +221,12 @@ public class ResponseSendingService {
 		else {
 			String URI = URIResolver.getRequestURI(servletRequest);
 			String correctedURI = URIUtils.correctUnproperDefaultPageURI(URI);
+			logger.debug("redirecting to: " + correctedURI);
 			tryToSendRedirectResponse(socket,  correctedURI);
 		}
 	}
 	
-	public void tryToServiceRequestUsingServlet(HttpServletRequestImpl servletRequest, Socket socket, RequestContent content) {
+	public synchronized void tryToServiceRequestUsingServlet(HttpServletRequestImpl servletRequest, Socket socket, RequestContent content) {
 		try {
 			
 			Optional<ServletContext> optionalServletContext = loadAppConfig(servletRequest);

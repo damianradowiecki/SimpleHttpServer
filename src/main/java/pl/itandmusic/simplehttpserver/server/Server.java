@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
+import pl.itandmusic.simplehttpserver.logger.LogLevel;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.request.RequestThread;
 
@@ -18,7 +19,9 @@ public class Server {
 		
 		try (ServerSocket serverSocket = new ServerSocket(Configuration.port)){
 			while(!serverSocket.isClosed()) {
+				logger.log("Waiting for connections", LogLevel.DEBUG);
 				Socket socket = serverSocket.accept();	
+				logger.log("Connection accepted", LogLevel.DEBUG);
 				new Thread(new RequestThread(socket)).start();
 			}
 		}catch(IOException exception) {

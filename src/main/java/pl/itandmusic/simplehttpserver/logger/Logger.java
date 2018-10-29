@@ -1,7 +1,10 @@
 package pl.itandmusic.simplehttpserver.logger;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+
+import pl.itandmusic.simplehttpserver.configuration.Configuration;
 
 public class Logger {
 
@@ -15,6 +18,10 @@ public class Logger {
 
 	public static Logger getLogger(Class<?> clazz) {
 		return new Logger(clazz);
+	}
+	
+	public void debug(String text) {
+		log(text, LogLevel.DEBUG);
 	}
 
 	public void info(String text) {
@@ -30,10 +37,12 @@ public class Logger {
 	}
 
 	public void log(String text, LogLevel logLevel) {
-		String date_ = prepareDateString();
-		String logLevel_ = logLevel.toString();
-		String className = clazz.getName();
-		System.out.println(date_ + "  " + logLevel_ + "  " + className + ": " + text);
+		if(isLevelEnabled(logLevel)) {
+			String date_ = prepareDateString();
+			String logLevel_ = logLevel.toString();
+			String className = clazz.getName();
+			System.out.println(date_ + "  " + logLevel_ + "  " + className + ": " + text);
+		}
 	}
 	
 	public void logException(Exception exception, LogLevel logLevel) {
@@ -48,4 +57,7 @@ public class Logger {
 		return logDateFormat.format(Calendar.getInstance().getTime());
 	}
 
+	private boolean isLevelEnabled(LogLevel logLevel) {
+		return Arrays.asList(Configuration.logLevels).contains(logLevel.toString());
+	}
 }

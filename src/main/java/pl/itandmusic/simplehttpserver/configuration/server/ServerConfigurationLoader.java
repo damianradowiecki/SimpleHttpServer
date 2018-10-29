@@ -31,6 +31,7 @@ public class ServerConfigurationLoader {
 			if(tryToLoadServerConfig(serverConfigurationPath.toFile())) {
 				Configuration.port = serverConfig.getPort();
 				Configuration.appsDirectory = serverConfig.getAppsDirectory();
+				Configuration.logLevels = serverConfig.getLogLevel().split(",");
 			}
 		} else {
 			logger.error("Cannot find server.xml file. Should be in {rootDirectory}" + File.separator+"config directory.");

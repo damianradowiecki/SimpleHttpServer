@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpSession;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
+import pl.itandmusic.simplehttpserver.logger.LogLevel;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.ServletContext;
 import pl.itandmusic.simplehttpserver.session.SessionManager;
@@ -15,10 +16,14 @@ import pl.itandmusic.simplehttpserver.session.SessionManager;
 public class SessionDestroyer {
 
 	public static final int SESSION_TIMEOUT_CHECKING_IN_MINUTES_PERIOD = 1;
+	private static final Logger logger = Logger.getLogger(SessionDestroyer.class);
 	
 	private SessionDestroyer() {}
 	
 	public static void start() {
+		
+		logger.log("Session destroyer started", LogLevel.INFO);
+		
 		for(ServletContext sc : Configuration.applications.values()) {
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 			executorService.scheduleAtFixedRate(new SessionDestroyerAction(sc.getSessionManager(), 

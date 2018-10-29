@@ -14,6 +14,8 @@ class ServerConfig {
 	private int port;
 	@XmlElement(name = "apps-directory")
 	private String appsDirectory;
+	@XmlElement(name = "log-level")
+	private String logLevel;
 
 	public int getPort() {
 		return port;
@@ -30,5 +32,15 @@ class ServerConfig {
 	public void setAppsDirectory(String appsDirectory) {
 		this.appsDirectory = appsDirectory;
 	}
+
+	public String getLogLevel() {
+		return logLevel;
+	}
+
+	public void setLogLevel(String logLevel) {
+		this.logLevel = logLevel;
+	}
+	
+	
 
 }

@@ -15,8 +15,8 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletInputStream;
 
-import pl.itandmusic.simplehttpserver.configuration.web.WebConfigurationLoader;
 import pl.itandmusic.simplehttpserver.enummeration.RequestType;
+import pl.itandmusic.simplehttpserver.logger.LogLevel;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.EnumerationImpl;
 import pl.itandmusic.simplehttpserver.model.HttpMethod;
@@ -29,7 +29,7 @@ import pl.itandmusic.simplehttpserver.utils.URIResolver;
 public class RequestContentConverter {
 
 	private static RequestContentConverter requestContentConverter;
-	private static final Logger logger = Logger.getLogger(WebConfigurationLoader.class);
+	private static final Logger logger = Logger.getLogger(RequestContentConverter.class);
 	private static final String PARAMS_DELIMITER = "&";
 	private static final String KEY_VALUE_DELIMITER = "=";
 
@@ -46,6 +46,8 @@ public class RequestContentConverter {
 	
 	public synchronized HttpServletRequestImpl convert(RequestContent content, Socket socket) {
 
+		logger.debug("converting requestContet of socket: " + socket);
+		
 		List<String> plainContent = content.getPlainContent();
 		
 		HttpMethod httpMethod = extractHttpMethod(plainContent);
@@ -91,10 +93,15 @@ public class RequestContentConverter {
 	}
 
 	String extractProtocol(List<String> content) {
-		String firstLine = content.get(0);
-		String[] parts = firstLine.split("\\s+");
-		String protocol = parts[2];
-		return protocol;
+		try {
+			String firstLine = content.get(0);
+			String[] parts = firstLine.split("\\s+");
+			String protocol = parts[2];
+			return protocol;
+		}catch(ArrayIndexOutOfBoundsException e) {
+			logger.log("Protocol not found", LogLevel.ERROR);
+			return "";
+		}
 	}
 
 	URI extractURI(List<String> content) {
@@ -195,9 +202,14 @@ public class RequestContentConverter {
 		String [] params = oneStringData.split(PARAMS_DELIMITER);
 		for(String p : params) {
 			String [] keyValuePairs = p.split(KEY_VALUE_DELIMITER);
-			String key = keyValuePairs[0].trim();
-			String value = keyValuePairs[1].trim();
-			result.put(key, value);
+			if(keyValuePairs.length == 2) {
+				String key = keyValuePairs[0].trim();
+				String value = keyValuePairs[1].trim();
+				result.put(key, value);
+			}
+			else {
+				logger.log("Couldn't extract param: " + p, LogLevel.WARN);
+			}
 		}
 		return result;
 	}

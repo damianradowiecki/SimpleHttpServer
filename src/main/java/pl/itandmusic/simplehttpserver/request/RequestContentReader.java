@@ -7,22 +7,14 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import pl.itandmusic.simplehttpserver.configuration.web.WebConfigurationLoader;
 import pl.itandmusic.simplehttpserver.logger.LogLevel;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.RequestContent;
 
 public class RequestContentReader {
 
-	
 	private static RequestContentReader requestContentReader;
-	private static final Logger logger = Logger.getLogger(WebConfigurationLoader.class);
-	private Socket socket;
-	private InputStreamReader inputStreamReader;
-	private BufferedReader bufferedReader;
-	private RequestContent content = new RequestContent();
-	private List<String> plainContent = new ArrayList<>();
-	private String postData = "";
+	private static final Logger logger = Logger.getLogger(RequestContentReader.class);
 	
 	private RequestContentReader() {}
 	
@@ -34,13 +26,14 @@ public class RequestContentReader {
 	}
 
 	public RequestContent read(Socket socket) {
-		this.socket = socket;
+		logger.debug("reading from socket: " + socket);
+		RequestContent content = new RequestContent();
 		try {
-			inputStreamReader = new InputStreamReader(this.socket.getInputStream());
-			bufferedReader = new BufferedReader(inputStreamReader);
+			InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream());
+			BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-			readPlainContent();
-			readPostData();
+			List<String> plainContent = readPlainContent(bufferedReader);
+			String postData = readPostData(plainContent, bufferedReader);
 
 			content.setPlainContent(plainContent);
 			content.setPOSTData(postData);
@@ -52,7 +45,10 @@ public class RequestContentReader {
 		return content;
 	}
 
-	private void readPlainContent() {
+	private List<String> readPlainContent(BufferedReader bufferedReader) {
+		
+		List<String> plainContent = new ArrayList<>();
+		
 		try {
 
 			String line;
@@ -61,13 +57,16 @@ public class RequestContentReader {
 				plainContent.add(line);
 			}
 
+			
+			return plainContent;
 		} catch (IOException ioException) {
 			logger.logException("RequestContentReader - readPlainContent()", ioException, LogLevel.ERROR);
+			return plainContent;
 		}
 
 	}
 
-	private void readPostData() {
+	private String readPostData(List<String> plainContent, BufferedReader bufferedReader) {
 		try {
 			int contentLengthHeaderValue = -1;
 
@@ -77,9 +76,10 @@ public class RequestContentReader {
 					break;
 				}
 			}
-			postData = readPostData(bufferedReader, contentLengthHeaderValue);
+			return readPostData(bufferedReader, contentLengthHeaderValue);
 		} catch (IOException ioException) {
 			logger.logException("RequestContentReader - readPostData()", ioException, LogLevel.ERROR);
+			return null;
 		}
 	}
 
