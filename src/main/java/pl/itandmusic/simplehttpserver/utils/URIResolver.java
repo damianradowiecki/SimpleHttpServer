@@ -6,7 +6,6 @@ import java.util.regex.Pattern;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
-import pl.itandmusic.simplehttpserver.model.ServletConfig;
 import pl.itandmusic.simplehttpserver.model.ServletContext;
 
 public class URIResolver {

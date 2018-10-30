@@ -96,8 +96,7 @@ public class RequestContentConverter {
 		try {
 			String firstLine = content.get(0);
 			String[] parts = firstLine.split("\\s+");
-			String protocol = parts[2];
-			return protocol;
+			return parts[2];
 		}catch(ArrayIndexOutOfBoundsException e) {
 			logger.log("Protocol not found", LogLevel.ERROR);
 			return "";
@@ -108,8 +107,7 @@ public class RequestContentConverter {
 		try {
 			String queryString = extractQueryString(content);
 			String[] queryStringParts = queryString.split("\\?");
-			URI uri = new URI(queryStringParts[0]);
-			return uri;
+			return new URI(queryStringParts[0]);
 		} catch (URISyntaxException uriSyntaxException) {
 			return null;
 		}
@@ -122,8 +120,8 @@ public class RequestContentConverter {
 			String localHost = InetAddress.getLocalHost().getHostAddress();
 			stringBUffer.append(localHost);
 			URI uri = extractURI(content);
-			String uri_ = uri.toASCIIString();
-			stringBUffer.append(uri_);
+			String uriASCIIString = uri.toASCIIString();
+			stringBUffer.append(uriASCIIString);
 		} catch (UnknownHostException | NullPointerException exception) {
 			logger.error(exception.getMessage());
 		}
@@ -133,8 +131,7 @@ public class RequestContentConverter {
 	String extractQueryString(List<String> content) {
 		String firstLine = content.get(0);
 		String[] parts = firstLine.split("\\s+");
-		String queryString = parts[1];
-		return queryString;
+		return parts[1];
 	}
 
 	Map<String, String> extractHeaders(List<String> content) {

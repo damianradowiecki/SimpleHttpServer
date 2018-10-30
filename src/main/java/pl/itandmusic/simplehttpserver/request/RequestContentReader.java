@@ -48,21 +48,17 @@ public class RequestContentReader {
 	private List<String> readPlainContent(BufferedReader bufferedReader) {
 		
 		List<String> plainContent = new ArrayList<>();
+		String line;
 		
 		try {
-
-			String line;
-
 			while ((line = bufferedReader.readLine()) != null && (line.length() != 0)) {
 				plainContent.add(line);
 			}
-
-			
-			return plainContent;
 		} catch (IOException ioException) {
 			logger.logException("RequestContentReader - readPlainContent()", ioException, LogLevel.ERROR);
-			return plainContent;
 		}
+		
+		return plainContent;
 
 	}
 
