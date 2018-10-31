@@ -28,17 +28,20 @@ import pl.itandmusic.simplehttpserver.utils.URIResolver;
 
 public class RequestContentConverter {
 
-	private static RequestContentConverter requestContentConverter;
+	private static RequestContentConverter requestContentConverter = new RequestContentConverter();
 	private static final Logger logger = Logger.getLogger(RequestContentConverter.class);
 	private static final String PARAMS_DELIMITER = "&";
 	private static final String KEY_VALUE_DELIMITER = "=";
+	private static boolean throwExceptionOnConstructorCall = false;
 
-	private RequestContentConverter() {}
+	private RequestContentConverter() {
+		if(throwExceptionOnConstructorCall) {
+			throw new RuntimeException("Singleton constructor call");
+		}
+		throwExceptionOnConstructorCall = true;
+	}
 	
 	public static RequestContentConverter getRequestContentConverter() {
-		if(requestContentConverter == null) {
-			requestContentConverter = new RequestContentConverter();
-		}
 		return requestContentConverter;
 	}
 	

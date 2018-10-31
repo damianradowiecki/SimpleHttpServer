@@ -15,6 +15,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
+import pl.itandmusic.simplehttpserver.http.ResponseStatus;
 import pl.itandmusic.simplehttpserver.logger.LogLevel;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
@@ -27,14 +28,17 @@ import pl.itandmusic.simplehttpserver.utils.URIUtils;
 public class ResponseSendingService {
 
 	private static final Logger logger = Logger.getLogger(ResponseSendingService.class);
-	private static ResponseSendingService responseSendingService;
+	private static ResponseSendingService responseSendingService = new ResponseSendingService() ;
+	private static boolean throwExceptionOnConstructorCall = false;
 	
-	private ResponseSendingService() {}
+	private ResponseSendingService(){
+		if(throwExceptionOnConstructorCall) {
+			throw new RuntimeException("Singleton constructor call");
+		}
+		throwExceptionOnConstructorCall = true;
+	}
 	
 	public static ResponseSendingService getResponseSendingService() {
-		if(responseSendingService == null) {
-			responseSendingService = new ResponseSendingService();
-		}
 		return responseSendingService;
 	}
 	
@@ -42,9 +46,8 @@ public class ResponseSendingService {
 
 		OutputStream os = socket.getOutputStream();
 		PrintWriter writer = new PrintWriter(os);
-		String mainHeader = "HTTP/1.1 200 OK";
 
-		writer.println(mainHeader);
+		writer.println(ResponseStatus.OK);
 
 		for (String headerName : response.getHeaders().keySet()) {
 			String header = headerName + " : " + response.getHeaders().get(headerName);
@@ -74,7 +77,7 @@ public class ResponseSendingService {
 	public synchronized void sendRedirectResponse(Socket socket, String redirectURL) throws IOException {
 		OutputStream os = socket.getOutputStream();
 
-		String mainHeader = "HTTP/1.1 302 Found";
+		String mainHeader = ResponseStatus.FOUND.toString();
 		String newLine = "\n";
 		String locationHeader = "Location" + " : " + redirectURL;
 
@@ -99,7 +102,7 @@ public class ResponseSendingService {
 	public synchronized void sendInternalErrorResponse(Socket socket) throws IOException {
 		OutputStream os = socket.getOutputStream();
 
-		String error500Header = "HTTP/1.1 500 Internal Server Error";
+		String error500Header = ResponseStatus.INTERNAL_SERVER_ERROR.toString();
 		String newLine = "\n";
 
 		os.write(error500Header.getBytes());
@@ -121,7 +124,7 @@ public class ResponseSendingService {
 	public synchronized void sendPageNotFoundResponse(Socket socket) throws IOException {
 		OutputStream os = socket.getOutputStream();
 
-		String error500Header = "HTTP/1.1 404 Not Found";
+		String error500Header = ResponseStatus.NOT_FOUND.toString();
 		String newLine = "\n";
 
 		os.write(error500Header.getBytes());
@@ -152,7 +155,7 @@ public class ResponseSendingService {
 						OutputStream os = socket.getOutputStream();
 						PrintWriter writer = new PrintWriter(os);
 	
-						writer.println("HTTP/1.1 200 OK");
+						writer.println(ResponseStatus.OK);
 						writer.println("Content-Type: text/html");
 						writer.println();
 	
@@ -192,7 +195,7 @@ public class ResponseSendingService {
 		OutputStream os = socket.getOutputStream();
 		PrintWriter writer = new PrintWriter(os);
 
-		writer.println("HTTP/1.1 200 OK");
+		writer.println(ResponseStatus.OK);
 		writer.println("Content-Type: text/html");
 		writer.println();
 		writer.println("<html>");

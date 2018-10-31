@@ -1,8 +1,4 @@
-Przemyslec serwisy. Skoro sa singletonami to albo synchronizacja metod, albo nie trzymac zmiennych jako
-pol klasy (tak jak jest teraz)
-
-ResponseSendingSErvice enum z http ok, http...
-
+Opcja włączenia Non-blocking NIO
 TESTY do poprawy
 TESTY do dorobienia dla brakujacych metod
 Listenery zwiazane z sesja (3 + 1)

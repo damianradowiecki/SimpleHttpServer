@@ -13,15 +13,18 @@ import pl.itandmusic.simplehttpserver.model.RequestContent;
 
 public class RequestContentReader {
 
-	private static RequestContentReader requestContentReader;
+	private static RequestContentReader requestContentReader = new RequestContentReader();
 	private static final Logger logger = Logger.getLogger(RequestContentReader.class);
+	private static boolean throwExceptionOnConstructorCall = false;
 	
-	private RequestContentReader() {}
+	private RequestContentReader() {
+		if(throwExceptionOnConstructorCall) {
+			throw new RuntimeException("Singleton constructor call");
+		}
+		throwExceptionOnConstructorCall = true;
+	}
 	
 	public static RequestContentReader getRequestContentReader() {
-		if(requestContentReader == null) {
-			requestContentReader = new RequestContentReader();
-		}
 		return requestContentReader;
 	}
 
