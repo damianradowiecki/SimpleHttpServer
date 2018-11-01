@@ -3,4 +3,5 @@
 	<port>9999</port>
 	<log-level>DEBUG,INFO,WARN,ERROR</log-level>
 	<apps-directory>/home/damian/eclipse-workspace/Other/SimpleHttpServer/webapp</apps-directory>
+	<non-blocking-mode>true</non-blocking-mode>
 </server-config>

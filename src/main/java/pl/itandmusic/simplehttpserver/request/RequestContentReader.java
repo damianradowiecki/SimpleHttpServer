@@ -24,7 +24,7 @@ public class RequestContentReader {
 		throwExceptionOnConstructorCall = true;
 	}
 	
-	public static RequestContentReader getRequestContentReader() {
+	public static RequestContentReader getInstance() {
 		return requestContentReader;
 	}
 

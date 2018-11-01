@@ -16,5 +16,6 @@ public class Configuration {
 	public static final int SERVLET_MAJOR_VERSION = 2;
 	public static final int SERVLET_MINOR_VERSION = 1;
 	public static String[] logLevels = new String[] {"INFO", "DEBUG", "WARN", "ERROR"};
+	public static boolean nonBlockingMode;
 	
 }

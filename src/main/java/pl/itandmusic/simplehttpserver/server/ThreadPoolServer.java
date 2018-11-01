@@ -3,17 +3,21 @@ package pl.itandmusic.simplehttpserver.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
 import pl.itandmusic.simplehttpserver.logger.LogLevel;
 import pl.itandmusic.simplehttpserver.logger.Logger;
-import pl.itandmusic.simplehttpserver.request.RequestThread;
+import pl.itandmusic.simplehttpserver.request.RequestHandler;
 
-public class Server {
+public class ThreadPoolServer {
 
-	private final static Logger logger = Logger.getLogger(Server.class);
+	private final static Logger logger = Logger.getLogger(ThreadPoolServer.class);
 	
 	public static void start() throws IOException {
+		
+		Executor executor = Executors.newCachedThreadPool();
 		
 		logger.info("Server started.");
 		
@@ -22,7 +26,7 @@ public class Server {
 				logger.log("Waiting for connections", LogLevel.DEBUG);
 				Socket socket = serverSocket.accept();	
 				logger.log("Connection accepted", LogLevel.DEBUG);
-				new Thread(new RequestThread(socket)).start();
+				executor.execute(new RequestHandler(socket));
 			}
 		}catch(IOException exception) {
 			logger.error("Server stopped");

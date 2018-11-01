@@ -5,10 +5,12 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.xml.bind.JAXBException;
 
+import pl.itandmusic.simplehttpserver.configuration.Configuration;
 import pl.itandmusic.simplehttpserver.configuration.server.ServerConfigurationLoader;
 import pl.itandmusic.simplehttpserver.configuration.web.WebConfigurationLoader;
 import pl.itandmusic.simplehttpserver.cron.SessionDestroyer;
-import pl.itandmusic.simplehttpserver.server.Server;
+import pl.itandmusic.simplehttpserver.server.NonBlockingServer;
+import pl.itandmusic.simplehttpserver.server.ThreadPoolServer;
 
 public class Main {
 
@@ -16,7 +18,13 @@ public class Main {
 		ServerConfigurationLoader.load();
 		WebConfigurationLoader.load();
 		SessionDestroyer.start();
-		Server.start();
+		if(Configuration.nonBlockingMode) {
+			NonBlockingServer.start();
+		}
+		else {
+			ThreadPoolServer.start();
+		}
+		
 	}
 
 }

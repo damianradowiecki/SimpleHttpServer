@@ -38,7 +38,7 @@ public class ResponseSendingService {
 		throwExceptionOnConstructorCall = true;
 	}
 	
-	public static ResponseSendingService getResponseSendingService() {
+	public static ResponseSendingService getInstance() {
 		return responseSendingService;
 	}
 	

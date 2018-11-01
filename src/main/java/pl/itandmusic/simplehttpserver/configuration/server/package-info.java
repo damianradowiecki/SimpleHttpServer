@@ -16,7 +16,10 @@ class ServerConfig {
 	private String appsDirectory;
 	@XmlElement(name = "log-level")
 	private String logLevel;
-
+	@XmlElement(name = "non-blocking-mode")
+	private boolean nonBlockingMode;
+	
+	
 	public int getPort() {
 		return port;
 	}
@@ -40,7 +43,13 @@ class ServerConfig {
 	public void setLogLevel(String logLevel) {
 		this.logLevel = logLevel;
 	}
-	
-	
+
+	public boolean getNonBlockingMode() {
+		return nonBlockingMode;
+	}
+
+	public void setNonBlockingMode(boolean nonBlockingMode) {
+		this.nonBlockingMode = nonBlockingMode;
+	}
 
 }

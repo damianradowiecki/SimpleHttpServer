@@ -41,7 +41,7 @@ public class RequestContentConverter {
 		throwExceptionOnConstructorCall = true;
 	}
 	
-	public static RequestContentConverter getRequestContentConverter() {
+	public static RequestContentConverter getInstance() {
 		return requestContentConverter;
 	}
 	

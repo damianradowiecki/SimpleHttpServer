@@ -4,32 +4,32 @@ import java.io.IOException;
 import java.net.Socket;
 
 import pl.itandmusic.simplehttpserver.enummeration.RequestType;
-import pl.itandmusic.simplehttpserver.logger.LogLevel;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 import pl.itandmusic.simplehttpserver.model.RequestContent;
 import pl.itandmusic.simplehttpserver.response.ResponseSendingService;
 
-public class RequestThread implements Runnable {
+public class RequestHandler implements Runnable {
 
-	private final Logger logger = Logger.getLogger(RequestThread.class);
+	private final Logger logger = Logger.getLogger(RequestHandler.class);
 	private Socket socket;
 	private HttpServletRequestImpl servletRequest;
 	private RequestContentReader requestContentReader;
 	private RequestContentConverter requestContentConverter;
 	private ResponseSendingService responseSendingService;
 
-	public RequestThread(Socket socket) {
+	public RequestHandler(Socket socket) {
 		this.socket = socket;
-		this.requestContentReader = RequestContentReader.getRequestContentReader();
-		this.requestContentConverter = RequestContentConverter.getRequestContentConverter();
-		this.responseSendingService = ResponseSendingService.getResponseSendingService();
+		this.requestContentReader = RequestContentReader.getInstance();
+		this.requestContentConverter = RequestContentConverter.getInstance();
+		this.responseSendingService = ResponseSendingService.getInstance();
 	}
+	
 
 	@Override
 	public void run() {
 		
-		logger.log("RequestThread started", LogLevel.DEBUG);
+		logger.debug("RequestHandler.run started");
 
 		RequestContent content = requestContentReader.read(socket);
 		

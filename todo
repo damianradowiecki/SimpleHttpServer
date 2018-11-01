@@ -1,4 +1,4 @@
-Opcja włączenia Non-blocking NIO
+obsluga ByteBuffer request
 TESTY do poprawy
 TESTY do dorobienia dla brakujacych metod
 Listenery zwiazane z sesja (3 + 1)
