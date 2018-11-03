@@ -7,12 +7,15 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import pl.itandmusic.simplehttpserver.configuration.Configuration;
 import pl.itandmusic.simplehttpserver.logger.Logger;
+import pl.itandmusic.simplehttpserver.request.NonBlockingRequestHandler;
 
 public class NonBlockingServer {
 
@@ -20,12 +23,18 @@ public class NonBlockingServer {
 	private static Map<SocketChannel, ByteBuffer> sockets = new ConcurrentHashMap<>();
 	private static final int BUFFER_SIZE = 100000;
 	
+	
+	private NonBlockingServer() {
+		throw new RuntimeException("Consturctor call exception");
+	}
+	
 	public static void start() throws IOException {
 		
+		NonBlockingRequestHandler nonBlockingRequestHandler = NonBlockingRequestHandler.getInstance();
 
 		ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 
-		serverSocketChannel.bind(new InetSocketAddress(4444));
+		serverSocketChannel.bind(new InetSocketAddress(Configuration.port));
 		
 		serverSocketChannel.configureBlocking(false);
 		
@@ -46,10 +55,11 @@ public class NonBlockingServer {
 				it.remove();
 				if(sk.isValid()) {
 					if(sk.isAcceptable()) {
-						logger.debug("accepting connection");
+						logger.debug("acceptable");
 						ServerSocketChannel ssc = (ServerSocketChannel)sk.channel();
 						logger.debug("SelectionKey:" + sk);
 						logger.debug("ServerSocketChannel:" + ssc.hashCode());
+						logger.debug("accepting connection");
 						SocketChannel sc = ssc.accept();
 						logger.debug("SocketChannel:" + sc);
 						sc.configureBlocking(false);
@@ -57,11 +67,12 @@ public class NonBlockingServer {
 						sockets.put(sc, ByteBuffer.allocate(BUFFER_SIZE));
 					}
 					if(sk.isReadable()) {
-						logger.debug("reading");
+						logger.debug("readable");
 						SocketChannel sc = (SocketChannel)sk.channel();
 						logger.debug("SelectionKey:" + sk);
 						logger.debug("SocketChannel:" + sc);
 						ByteBuffer bb = sockets.get(sc);
+						logger.debug("reading");
 						int read = sc.read(bb);
 						if(read == -1) {
 							System.out.println("end");
@@ -76,19 +87,23 @@ public class NonBlockingServer {
 							sk.interestOps(SelectionKey.OP_WRITE);
 						}
 						else {
+							sc.close();
+							sockets.remove(sc);
 							logger.debug("Connection closed by client");
 							continue;
 						}
 					}
 					if(sk.isWritable()) {
-						logger.debug("writing");
+						logger.debug("writable");
 						SocketChannel sc = (SocketChannel)sk.channel();
 						logger.debug("SelectionKey:" + sk);
 						logger.debug("SocketChannel:" + sc);
 						ByteBuffer bb = sockets.get(sc);
-						sc.write(bb);
-						if(!bb.hasRemaining()) {
-							bb.compact();
+						ByteBuffer response = nonBlockingRequestHandler.generateResponse((ByteBuffer)bb.flip());
+						logger.debug("writing");
+						sc.write(response);
+						if(!response.hasRemaining()) {
+							response.compact();
 							sk.interestOps(SelectionKey.OP_READ);
 						}
 					}

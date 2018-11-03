@@ -4,6 +4,7 @@ import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
@@ -17,7 +18,7 @@ public class HttpSessionImpl implements HttpSession {
 	private SessionStatus status;
 	
 	public HttpSessionImpl(String id) {
-		this.id = id;
+		this.id = Objects.requireNonNull(id);
 		creationTime = new GregorianCalendar();
 		status = SessionStatus.NEW;
 	}

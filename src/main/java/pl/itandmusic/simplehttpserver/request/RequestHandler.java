@@ -2,6 +2,7 @@ package pl.itandmusic.simplehttpserver.request;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Objects;
 
 import pl.itandmusic.simplehttpserver.enummeration.RequestType;
 import pl.itandmusic.simplehttpserver.logger.Logger;
@@ -19,7 +20,7 @@ public class RequestHandler implements Runnable {
 	private ResponseSendingService responseSendingService;
 
 	public RequestHandler(Socket socket) {
-		this.socket = socket;
+		this.socket = Objects.requireNonNull(socket);
 		this.requestContentReader = RequestContentReader.getInstance();
 		this.requestContentConverter = RequestContentConverter.getInstance();
 		this.responseSendingService = ResponseSendingService.getInstance();
@@ -52,7 +53,7 @@ public class RequestHandler implements Runnable {
 			responseSendingService.tryToServiceRequestUsingServlet(servletRequest, socket, content);
 		}
 		else {
-			logger.debug("app page not found");
+			logger.debug("app page not found for: " + servletRequest.getRequestURI());
 			responseSendingService.tryToSendPageNotFoundResponse(socket);
 		}
 		

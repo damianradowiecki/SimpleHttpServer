@@ -13,6 +13,7 @@ public class RandomString {
 	private static final int allLength = ALL.length();
 
 	private RandomString() {
+		throw new RuntimeException("Consturctor call exception");
 	}
 
 	public static String generate() {

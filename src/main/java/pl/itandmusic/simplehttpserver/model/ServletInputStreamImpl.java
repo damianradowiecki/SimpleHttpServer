@@ -3,6 +3,7 @@ package pl.itandmusic.simplehttpserver.model;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.Objects;
 
 import javax.servlet.ServletInputStream;
 
@@ -15,9 +16,11 @@ public class ServletInputStreamImpl extends ServletInputStream {
 	private InputStream inputStream;
 	
 	
-	public ServletInputStreamImpl(Socket clietnSocket) {
+	public ServletInputStreamImpl(Socket clientSocket) {
 		try {
-			inputStream = clietnSocket.getInputStream();
+			inputStream = Objects
+					.requireNonNull(clientSocket)
+					.getInputStream();
 		} catch (IOException e) {
 			logger.logException("ServletInputStreamImpl - constructor", e, LogLevel.ERROR);
 		}

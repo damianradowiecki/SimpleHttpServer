@@ -1,13 +1,15 @@
 package pl.itandmusic.simplehttpserver.model;
 
+import java.util.Objects;
+
 public class Pair<K, V> {
 
 	private K key;
 	private V value;
 
 	public Pair(K key, V value) {
-		this.key = key;
-		this.value = value;
+		this.key = Objects.requireNonNull(key);
+		this.value = Objects.requireNonNull(value);
 	}
 
 	public K getKey() {

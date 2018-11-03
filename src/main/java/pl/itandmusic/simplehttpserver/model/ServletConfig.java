@@ -3,6 +3,7 @@ package pl.itandmusic.simplehttpserver.model;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
@@ -18,7 +19,7 @@ public class ServletConfig implements javax.servlet.ServletConfig {
 
 	
 	public ServletConfig(ServletContext servletContext) {
-		this.servletContext = servletContext;
+		this.servletContext = Objects.requireNonNull(servletContext);
 	}
 	
 	public Map<String, String> getInitParams(){

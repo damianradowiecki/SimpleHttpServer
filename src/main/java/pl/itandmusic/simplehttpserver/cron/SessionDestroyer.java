@@ -18,7 +18,9 @@ public class SessionDestroyer {
 	public static final int SESSION_TIMEOUT_CHECKING_IN_MINUTES_PERIOD = 1;
 	private static final Logger logger = Logger.getLogger(SessionDestroyer.class);
 	
-	private SessionDestroyer() {}
+	private SessionDestroyer() {
+		throw new RuntimeException("Constructor call exception");
+	}
 	
 	public static void start() {
 		

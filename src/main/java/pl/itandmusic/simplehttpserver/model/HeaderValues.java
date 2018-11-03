@@ -3,6 +3,7 @@ package pl.itandmusic.simplehttpserver.model;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
 
 public class HeaderValues implements Enumeration<String> {
 
@@ -10,6 +11,7 @@ public class HeaderValues implements Enumeration<String> {
 	private int currentPosition = 0;
 
 	public HeaderValues(String notSplitedHeaders) {
+		Objects.requireNonNull(notSplitedHeaders);
 		for (String s : notSplitedHeaders.split(",")) {
 			s = s.trim();
 			headers.add(s);

@@ -1,5 +1,7 @@
 package pl.itandmusic.simplehttpserver.http;
 
+import java.util.Objects;
+
 public enum ResponseStatus {
 	OK("HTTP/1.1 200 OK"), 
 	NOT_FOUND("HTTP/1.1 404 Not Found"), 
@@ -9,7 +11,7 @@ public enum ResponseStatus {
 	private String header;
 	
 	private ResponseStatus(String header) {
-		this.header = header;
+		this.header = Objects.requireNonNull(header);
 	}
 	
 	@Override

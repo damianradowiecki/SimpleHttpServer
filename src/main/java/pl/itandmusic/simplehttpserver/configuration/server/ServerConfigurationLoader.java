@@ -19,7 +19,9 @@ public class ServerConfigurationLoader {
 	private static ServerConfig serverConfig;
 
 	
-	private ServerConfigurationLoader() {}
+	private ServerConfigurationLoader() {
+		throw new RuntimeException("Constructor call exception");
+	}
 	
 	public static void load(){
 

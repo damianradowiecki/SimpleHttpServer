@@ -16,8 +16,20 @@ import pl.itandmusic.simplehttpserver.utils.RandomString;
 public class SessionManager {
 
 	public final Set<HttpSession> sessions = new HashSet<>();
-
 	private int sessionTimeout;
+	private static final SessionManager sessionManager = new SessionManager();
+	private static boolean throwExceptionOnConstructorCall = false;
+	
+	private SessionManager() {
+		if(throwExceptionOnConstructorCall) {
+			throw new RuntimeException("Singleton constructor call");
+		}
+		throwExceptionOnConstructorCall = true;
+	}
+	
+	public static SessionManager getInstance() {
+		return sessionManager;
+	}
 
 	public int getSessionTimeout() {
 		return sessionTimeout;

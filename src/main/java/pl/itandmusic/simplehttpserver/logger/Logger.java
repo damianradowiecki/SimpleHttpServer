@@ -3,6 +3,7 @@ package pl.itandmusic.simplehttpserver.logger;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Objects;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
 
@@ -13,7 +14,7 @@ public class Logger {
 	private SimpleDateFormat logDateFormat = new SimpleDateFormat(pattern);
 
 	private Logger(Class<?> clazz) {
-		this.clazz = clazz;
+		this.clazz = Objects.requireNonNull(clazz);
 	}
 
 	public static Logger getLogger(Class<?> clazz) {

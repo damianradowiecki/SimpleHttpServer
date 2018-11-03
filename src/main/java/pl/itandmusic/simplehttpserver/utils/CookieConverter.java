@@ -16,6 +16,10 @@ public class CookieConverter {
 	private static final String SEPARATOR = ";";
 	private static final String NAME_VALUE_SEPARATOR = "=";
 
+	private CookieConverter() {
+		throw new RuntimeException("Consturctor call exception");
+	}
+	
 	public static List<Cookie> convertToList(String cookieHeader) {
 		List<Cookie> cookies = new ArrayList<>();
 		for (String s : cookieHeader.split(SEPARATOR)) {

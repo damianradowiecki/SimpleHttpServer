@@ -36,6 +36,10 @@ public class WebConfigurationLoader {
 	private static List<String> appFolderNames = new ArrayList<>();
 	private static final int DEFAULT_SESSION_TIMEOUT = 30;
 
+	private WebConfigurationLoader() {
+		throw new RuntimeException("Constructor call exception");
+	}
+	
 	public static void load()
 			throws IOException, ClassNotFoundException, JAXBException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 
@@ -190,7 +194,7 @@ public class WebConfigurationLoader {
 	}
 	
 	private static void setSessionConfiguration(ServletContext servletContext, WebApp webApp) {
-		SessionManager sessionManager = new SessionManager();
+		SessionManager sessionManager = SessionManager.getInstance();
 		if(webApp.getSessionConfig().getSessionTimeout() > 0) {
 			sessionManager.setSessionTimeout(webApp.getSessionConfig().getSessionTimeout());
 		}

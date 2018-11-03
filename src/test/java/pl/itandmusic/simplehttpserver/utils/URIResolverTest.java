@@ -20,11 +20,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
-import pl.itandmusic.simplehttpserver.configuration.server.ServerConfigurationLoader;
-import pl.itandmusic.simplehttpserver.configuration.web.WebConfigurationLoader;
-import pl.itandmusic.simplehttpserver.model.ServletContext;
 import pl.itandmusic.simplehttpserver.model.HttpServletRequestImpl;
 import pl.itandmusic.simplehttpserver.model.ServletConfig;
+import pl.itandmusic.simplehttpserver.model.ServletContext;
 
 public class URIResolverTest {
 

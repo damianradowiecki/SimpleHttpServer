@@ -15,6 +15,10 @@ public class ThreadPoolServer {
 
 	private final static Logger logger = Logger.getLogger(ThreadPoolServer.class);
 	
+	private ThreadPoolServer() {
+		throw new RuntimeException("Consturctor call exception");
+	}
+	
 	public static void start() throws IOException {
 		
 		Executor executor = Executors.newCachedThreadPool();

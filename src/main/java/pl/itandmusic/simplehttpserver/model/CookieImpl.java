@@ -1,5 +1,7 @@
 package pl.itandmusic.simplehttpserver.model;
 
+import java.util.Objects;
+
 import javax.servlet.http.Cookie;
 
 public class CookieImpl extends Cookie {
@@ -8,7 +10,8 @@ public class CookieImpl extends Cookie {
 	private String value;
 	
 	public CookieImpl(String name, String value) {
-		super(name, value);
+		super(Objects.requireNonNull(name), 
+				Objects.requireNonNull(value));
 	}
 
 	@Override

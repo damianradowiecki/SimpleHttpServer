@@ -12,6 +12,10 @@ public class URIResolver {
 
 	private static Pattern pattern;
 	private static Matcher matcher;
+	
+	private URIResolver() {
+		throw new RuntimeException("Consturctor call exception");
+	}
 
 	public static boolean serverInfoRequest(String requestURI) {
 		return requestURI.equals("/") || requestURI.equals("\\");
