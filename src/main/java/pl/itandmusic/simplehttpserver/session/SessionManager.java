@@ -10,6 +10,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 
 import pl.itandmusic.simplehttpserver.model.HttpSessionImpl;
+import pl.itandmusic.simplehttpserver.model.ServletContext;
 import pl.itandmusic.simplehttpserver.service.CookieService;
 import pl.itandmusic.simplehttpserver.utils.RandomString;
 
@@ -17,18 +18,10 @@ public class SessionManager {
 
 	public final Set<HttpSession> sessions = new HashSet<>();
 	private int sessionTimeout;
-	private static final SessionManager sessionManager = new SessionManager();
-	private static boolean throwExceptionOnConstructorCall = false;
+	private ServletContext servletContext;
 	
-	private SessionManager() {
-		if(throwExceptionOnConstructorCall) {
-			throw new RuntimeException("Singleton constructor call");
-		}
-		throwExceptionOnConstructorCall = true;
-	}
-	
-	public static SessionManager getInstance() {
-		return sessionManager;
+	public SessionManager(ServletContext servletContext) {
+		this.servletContext = servletContext;
 	}
 
 	public int getSessionTimeout() {
@@ -49,7 +42,10 @@ public class SessionManager {
 
 	public HttpSession createNewSession() {
 		String newSessionId = generateSessionId();
-		return new HttpSessionImpl(newSessionId);
+		HttpSession session = new HttpSessionImpl(newSessionId, servletContext);
+		sessions.add(session);
+		servletContext.getListenerManager().invokeSessionCreated(session);
+		return session;
 	}
 
 	public Optional<HttpSession> getSessionById(String sessionId) {
@@ -69,8 +65,9 @@ public class SessionManager {
 		}
 	}
 
-	public void destorySession(HttpSession httpSession) {
-		sessions.remove(httpSession);
+	public void destorySession(HttpSession session) {
+		sessions.remove(session);
+		servletContext.getListenerManager().invokeSessionDestroyed(session);
 	}
 
 	private String generateSessionId() {
@@ -83,4 +80,5 @@ public class SessionManager {
 	private synchronized List<String> getInUseSessionIds() {
 		return sessions.stream().map(s -> s.getId()).collect(Collectors.toList());
 	}
+	
 }

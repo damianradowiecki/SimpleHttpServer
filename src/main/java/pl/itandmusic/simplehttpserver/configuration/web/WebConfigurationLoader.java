@@ -18,8 +18,6 @@ import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -28,7 +26,6 @@ import pl.itandmusic.simplehttpserver.configuration.Configuration;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.model.ServletConfig;
 import pl.itandmusic.simplehttpserver.model.ServletContext;
-import pl.itandmusic.simplehttpserver.session.SessionManager;
 
 public class WebConfigurationLoader {
 
@@ -122,7 +119,7 @@ public class WebConfigurationLoader {
 		
 		setSessionConfiguration(servletContext, webApp);
 
-		runServletInitializedMethodOnListeners(servletContext);
+		servletContext.getListenerManager().invokeContextInitialized();
 
 		Configuration.applications.put(servletContext.getServletContextName(), servletContext);
 
@@ -194,15 +191,13 @@ public class WebConfigurationLoader {
 	}
 	
 	private static void setSessionConfiguration(ServletContext servletContext, WebApp webApp) {
-		SessionManager sessionManager = SessionManager.getInstance();
 		if(webApp.getSessionConfig().getSessionTimeout() > 0) {
-			sessionManager.setSessionTimeout(webApp.getSessionConfig().getSessionTimeout());
+			servletContext.getSessionManager().setSessionTimeout(webApp.getSessionConfig().getSessionTimeout());
 		}
 		else {
-			sessionManager.setSessionTimeout(DEFAULT_SESSION_TIMEOUT);
+			servletContext.getSessionManager().setSessionTimeout(DEFAULT_SESSION_TIMEOUT);
 		}
 		
-		servletContext.setSessionManager(sessionManager);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -213,19 +208,6 @@ public class WebConfigurationLoader {
 			servletContext.getListeners().add(clazz);
 		}
 
-	}
-
-	private static void runServletInitializedMethodOnListeners(ServletContext servletContext)
-			throws InstantiationException, IllegalAccessException {
-		for (Class<? extends EventListener> l : servletContext.getListeners()) {
-			for (Class<?> i : l.getInterfaces()) {
-				if (i == ServletContextListener.class) {
-					ServletContextListener servletContextListener = ServletContextListener.class.cast(l.newInstance());
-					ServletContextEvent servletContextEvent = new ServletContextEvent(servletContext);
-					servletContextListener.contextInitialized(servletContextEvent);
-				}
-			}
-		}
 	}
 
 	private static Class<?> loadClassFromAppClassesFolder(ServletContext servletContext, String urlPattern) throws IOException, ClassNotFoundException{

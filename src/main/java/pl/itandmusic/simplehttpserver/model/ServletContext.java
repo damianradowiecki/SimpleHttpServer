@@ -20,6 +20,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import pl.itandmusic.simplehttpserver.configuration.Configuration;
+import pl.itandmusic.simplehttpserver.listener.ListenerManager;
 import pl.itandmusic.simplehttpserver.logger.LogLevel;
 import pl.itandmusic.simplehttpserver.logger.Logger;
 import pl.itandmusic.simplehttpserver.session.SessionManager;
@@ -34,14 +35,15 @@ public class ServletContext implements javax.servlet.ServletContext {
 	private Map<String, String> initParams = new HashMap<>();
 	private List<Class<? extends EventListener>> listeners = new ArrayList<>();
 	private Map<String, Object> attributes = new HashMap<>();
-	private SessionManager sessionManager;
+	private SessionManager sessionManager = new SessionManager(this);
+	private ListenerManager listenerManager = new ListenerManager(this);
 
 	public SessionManager getSessionManager() {
 		return sessionManager;
 	}
-
-	public void setSessionManager(SessionManager sessionManager) {
-		this.sessionManager = sessionManager;
+	
+	public ListenerManager getListenerManager() {
+		return listenerManager;
 	}
 
 	public List<Class<? extends EventListener>> getListeners() {
@@ -107,7 +109,7 @@ public class ServletContext implements javax.servlet.ServletContext {
 	}
 
 	@Override
-	public Set getResourcePaths(String path) {
+	public Set<String> getResourcePaths(String path) {
 		// TODO Auto-generated method stub
 		return null;
 	}

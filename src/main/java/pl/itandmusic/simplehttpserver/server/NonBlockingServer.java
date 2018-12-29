@@ -8,6 +8,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +22,8 @@ public class NonBlockingServer {
 
 	private static final Logger logger = Logger.getLogger(NonBlockingServer.class);
 	private static Map<SocketChannel, ByteBuffer> sockets = new ConcurrentHashMap<>();
-	private static final int BUFFER_SIZE = 100000;
+	private static final int BUFFER_SIZE = 110;
+	private StringBuilder requestContent = new StringBuilder(1000);
 	
 	
 	private NonBlockingServer() {
@@ -72,15 +74,19 @@ public class NonBlockingServer {
 						logger.debug("SelectionKey:" + sk);
 						logger.debug("SocketChannel:" + sc);
 						ByteBuffer bb = sockets.get(sc);
+						System.out.println(new String(bb.array(), "UTF-8"));
 						logger.debug("reading");
 						int read = sc.read(bb);
 						if(read == -1) {
 							System.out.println("end");
 							sc.close();
 							sockets.remove(sc);
+							continue;
 						}
 						else if(read == 0) {
 							System.out.println("end on zero");
+							bb.clear();
+							continue;
 						}
 						bb.flip();
 						if(sk.isValid()) {
@@ -101,11 +107,20 @@ public class NonBlockingServer {
 						ByteBuffer bb = sockets.get(sc);
 						ByteBuffer response = nonBlockingRequestHandler.generateResponse((ByteBuffer)bb.flip());
 						logger.debug("writing");
+						/*nonBlockingRequestHandler.writeLine(sc, "HTTP/1.1 200 OK");
+						nonBlockingRequestHandler.writeLine(sc, "Date: " + new Date().toString());
+						nonBlockingRequestHandler.writeLine(sc, "Server: Java HTTP Server");
+						nonBlockingRequestHandler.writeLine(sc, "Content-Length: 13");
+						nonBlockingRequestHandler.writeLine(sc, "Content-Type: text/html");
+						nonBlockingRequestHandler.writeLine(sc, "Connection: Closed");
+						nonBlockingRequestHandler.writeLine(sc, "");*/
+						System.out.println(new String(response.array(), "UTF-8"));
 						sc.write(response);
 						if(!response.hasRemaining()) {
-							response.compact();
 							sk.interestOps(SelectionKey.OP_READ);
+							bb.compact();
 						}
+						//sk.interestOps(SelectionKey.OP_READ);
 					}
 				}
 			}

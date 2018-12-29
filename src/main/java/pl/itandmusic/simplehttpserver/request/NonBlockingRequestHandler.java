@@ -1,10 +1,13 @@
 package pl.itandmusic.simplehttpserver.request;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
+import java.util.Date;
 
 import pl.itandmusic.simplehttpserver.logger.Logger;
 
@@ -14,6 +17,8 @@ public class NonBlockingRequestHandler {
 	private static final NonBlockingRequestHandler nonBlockingRequestHandler = new NonBlockingRequestHandler();
 	private static boolean throwExceptionOnConstructorCall = false;
 	private static final int initialResponseBufferSize = 10000;
+	private Charset charset = Charset.forName("UTF-8");
+	private CharsetEncoder encoder = charset.newEncoder();
 	
 	private NonBlockingRequestHandler() {
 		if(throwExceptionOnConstructorCall) {
@@ -30,30 +35,24 @@ public class NonBlockingRequestHandler {
 		
 		logger.debug("generating response");
 		
+		String headers ="HTTP/1.1 200 OK\r\n" + 
+				"Date: " + new Date().toString() + "\r\n" + 
+				"Server: Java HTTP Server\r\n" + 
+				"Content-Length: 13\r\n" + 
+				"Content-Type: text/html\r\n" + 
+				"Connection: Closed\r\n\r\n";
 		
-		
-
-		
-		String headers ="HTTP/1.1 200 OK\n" + 
-				"Date: Mon, 27 Jul 2009 12:28:53 GMT\n" + 
-				"Server: Apache/2.2.14 (Win32)\n" + 
-				"Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT\n" + 
-				"Content-Length: 88\n" + 
-				"Content-Type: text/html\n" + 
-				"Connection: Closed";
-		
-		String content = "<html>\n" + 
-				"<body>\n" + 
-				"<h1>Hello, World!</h1>\n" + 
-				"</body>\n" + 
-				"</html>";
+		String content = "Hello, World!";
 		
 		CharBuffer buffer = CharBuffer.wrap(headers + content);
-		
-		Charset charset = Charset.forName("UTF-8");
-		CharsetEncoder encoder = charset.newEncoder();
 
-		
 		return encoder.encode(buffer);
+	}
+	
+	public void writeLine(WritableByteChannel writableByteChannel, String line) throws IOException {
+		CharBuffer charBuffer = CharBuffer.wrap(line + "\r\n");
+		ByteBuffer byteBuffer = encoder.encode(charBuffer);
+
+		writableByteChannel.write(byteBuffer);
 	}
 }

@@ -6,21 +6,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
 
+@SuppressWarnings("deprecation")
 public class HttpSessionImpl implements HttpSession {
 
 	private Map<String, Object> attributes = new HashMap<>();
 	private GregorianCalendar creationTime;
 	private String id;
 	private SessionStatus status;
+	private ServletContext servletContext;
 	
-	public HttpSessionImpl(String id) {
+	public HttpSessionImpl(String id, ServletContext servletContext) {
 		this.id = Objects.requireNonNull(id);
+		this.servletContext = Objects.requireNonNull(servletContext);
 		creationTime = new GregorianCalendar();
 		status = SessionStatus.NEW;
+		
 	}
 	
 	@Override
@@ -96,7 +99,9 @@ public class HttpSessionImpl implements HttpSession {
 
 	@Override
 	public void removeAttribute(String name) {
-		attributes.remove(name);
+		Object object = attributes.remove(name);
+		servletContext.getListenerManager().invokeValueUnbound(this, attributes.get(name).getClass());
+		servletContext.getListenerManager().invokeAttributeRemoved(this, object);
 	}
 
 	@Override
@@ -106,7 +111,14 @@ public class HttpSessionImpl implements HttpSession {
 
 	@Override
 	public void setAttribute(String name, Object value) {
+		boolean exists = attributes.containsKey(name);
 		attributes.put(name, value);
+		if(exists) {
+			servletContext.getListenerManager().invokeAttributeReplaced(this, value);
+		}else {
+			servletContext.getListenerManager().invokeAttributeAdded(this, value);
+		}
+		servletContext.getListenerManager().invokeValueBound(this, attributes.get(name).getClass());
 	}
 
 	@Override

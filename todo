@@ -1,3 +1,4 @@
+TESTY listenerow -> stworzyc aplikacje z listenerami i ja odpalic i zobaczyc czy dziala
 java-nio-http-server analiza
 obsluga ByteBuffer request
 TESTY do poprawy
@@ -6,6 +7,7 @@ Listenery zwiazane z sesja (3 + 1)
 Implementacja metod
 Wszystkie nasłuchiwacze (listeners)
 Wyspapienia TODO cos z tym trzeba zrobic
+Obsluga annotation based web app
 
 teraz do glowengo class loadera dodane sa sciezki do poszczegolnych katalogow classes dla kazdej aplikacji - 
 - trzeba usunac ladowanie klas serwletow za pomoca specjalnych classloadero - niech laduja sie normalnie.
