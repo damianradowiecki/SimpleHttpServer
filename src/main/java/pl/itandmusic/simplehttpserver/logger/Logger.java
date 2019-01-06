@@ -46,7 +46,7 @@ public class Logger {
 		}
 	}
 	
-	public void logException(Exception exception, LogLevel logLevel) {
+	public void logException(Throwable exception, LogLevel logLevel) {
 		log("Error message: " + exception.getMessage(), logLevel);
 	}
 	

@@ -9,32 +9,37 @@
     <welcome-file>default.htm</welcome-file>
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
-  
   <context-param>
-  	<param-name>dogBreed</param-name>
-  	<param-value>Aidi</param-value>
+    <param-name>dogBreed</param-name>
+    <param-value>Aidi</param-value>
   </context-param>
-  
   <context-param>
-  	<param-name>dogName</param-name>
-  	<param-value>TestseT</param-value>
+    <param-name>dogName</param-name>
+    <param-value>TestseT</param-value>
   </context-param>
-  
   <servlet>
-  	<servlet-name>listenerTester</servlet-name>
-  	<servlet-class>pl.itandmusic.ListenerTester</servlet-class>
+    <servlet-name>listenerTester</servlet-name>
+    <servlet-class>pl.itandmusic.ListenerTester</servlet-class>
   </servlet>
-  
   <servlet-mapping>
-  	<servlet-name>listenerTester</servlet-name>
-  	<url-pattern>/test</url-pattern>
+    <servlet-name>listenerTester</servlet-name>
+    <url-pattern>/test</url-pattern>
   </servlet-mapping>
-  
+  <servlet>
+  	<servlet-name>listenerTest</servlet-name>
+  	<servlet-class>pl.itandmusic.ListenerTest</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>listenerTest</servlet-name>
+  	<url-pattern>/listenertest</url-pattern>
+  </servlet-mapping>
   <listener>
-  	<listener-class>pl.itandmusic.ServletContextListenerImpl</listener-class>
+    <listener-class>pl.itandmusic.ServletContextListenerImpl</listener-class>
   </listener>
-  
-  <session-config>
-  	<session-timeout>15</session-timeout>
-  </session-config>
+  <listener>
+    <listener-class>pl.itandmusic.HttpSessionListenerImpl</listener-class>
+  </listener>
+  <listener>
+  	<listener-class>pl.itandmusic.HttpSessionAttributeListenerImpl</listener-class>
+  </listener>
 </web-app>

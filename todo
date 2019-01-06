@@ -1,11 +1,10 @@
-TESTY listenerow -> stworzyc aplikacje z listenerami i ja odpalic i zobaczyc czy dziala
+JSP handling
+
 java-nio-http-server analiza
 obsluga ByteBuffer request
 TESTY do poprawy
 TESTY do dorobienia dla brakujacych metod
-Listenery zwiazane z sesja (3 + 1)
 Implementacja metod
-Wszystkie nasłuchiwacze (listeners)
 Wyspapienia TODO cos z tym trzeba zrobic
 Obsluga annotation based web app
 

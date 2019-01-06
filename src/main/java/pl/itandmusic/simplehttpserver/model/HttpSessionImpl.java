@@ -100,7 +100,7 @@ public class HttpSessionImpl implements HttpSession {
 	@Override
 	public void removeAttribute(String name) {
 		Object object = attributes.remove(name);
-		servletContext.getListenerManager().invokeValueUnbound(this, attributes.get(name).getClass());
+		servletContext.getListenerManager().invokeValueUnbound(this, attributes.get(name));
 		servletContext.getListenerManager().invokeAttributeRemoved(this, object);
 	}
 
@@ -118,7 +118,8 @@ public class HttpSessionImpl implements HttpSession {
 		}else {
 			servletContext.getListenerManager().invokeAttributeAdded(this, value);
 		}
-		servletContext.getListenerManager().invokeValueBound(this, attributes.get(name).getClass());
+		servletContext.getListenerManager().invokeValueBound(this, attributes.get(name));
+		
 	}
 
 	@Override

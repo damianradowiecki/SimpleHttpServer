@@ -72,8 +72,7 @@ public class SessionManager {
 
 	private String generateSessionId() {
 		String sessionId = null;
-		while (!getInUseSessionIds().contains((sessionId = RandomString.generate())))
-			;
+		while (getInUseSessionIds().contains((sessionId = RandomString.generate())));
 		return sessionId;
 	}
 

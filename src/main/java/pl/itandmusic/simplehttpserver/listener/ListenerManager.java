@@ -79,38 +79,26 @@ public class ListenerManager {
 	}
 
 	public void invokeValueBound(HttpSession httpSession, Object object) {
-		try {
-			Class<?> clazz = object.getClass();
-			for (Class<?> i : clazz.getInterfaces()) {
-				if (i == HttpSessionBindingListener.class) {
-					HttpSessionBindingListener httpSessionBindingListener = HttpSessionBindingListener.class
-							.cast(clazz.newInstance());
-					HttpSessionBindingEvent event = 
-							new HttpSessionBindingEvent(httpSession, httpSession.getId(), object);
-					httpSessionBindingListener.valueBound(event);
-				}
+		if(object instanceof HttpSessionBindingListener) {
+			try {
+				HttpSessionBindingEvent event = 
+						new HttpSessionBindingEvent(httpSession, httpSession.getId(), object);
+				((HttpSessionBindingListener)object).valueBound(event);
+			}catch(Throwable exception) {
+				LOGGER.logException(exception, LogLevel.WARN);
 			}
-
-		} catch (InstantiationException | IllegalAccessException e) {
-			LOGGER.logException(e, LogLevel.WARN);
 		}
 	}
 
 	public void invokeValueUnbound(HttpSession httpSession, Object object) {
-		try {
-			Class<?> clazz = object.getClass();
-			for (Class<?> i : clazz.getInterfaces()) {
-				if (i == HttpSessionBindingListener.class) {
-					HttpSessionBindingListener httpSessionBindingListener = HttpSessionBindingListener.class
-							.cast(clazz.newInstance());
-					HttpSessionBindingEvent event = 
-							new HttpSessionBindingEvent(httpSession, httpSession.getId(), object);
-					httpSessionBindingListener.valueUnbound(event);
-				}
+		if(object instanceof HttpSessionBindingListener) {
+			try {
+				HttpSessionBindingEvent event = 
+						new HttpSessionBindingEvent(httpSession, httpSession.getId(), object);
+				((HttpSessionBindingListener)object).valueUnbound(event);
+			}catch(Throwable exception) {
+				LOGGER.logException(exception, LogLevel.WARN);
 			}
-
-		} catch (InstantiationException | IllegalAccessException e) {
-			LOGGER.logException(e, LogLevel.WARN);
 		}
 	}
 	

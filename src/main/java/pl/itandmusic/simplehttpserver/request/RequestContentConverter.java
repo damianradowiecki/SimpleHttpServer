@@ -57,6 +57,7 @@ public class RequestContentConverter {
 		String protocol = extractProtocol(plainContent);
 		URI requestURI = extractURI(plainContent);
 		StringBuffer requestURL = extractURL(plainContent);
+		String contextPath = extractContextPath(plainContent);
 		String queryString = extractQueryString(plainContent);
 		Map<String, String> headers = extractHeaders(plainContent);
 		Enumeration<String> headerNames = extractHeaderNames(plainContent);
@@ -80,6 +81,7 @@ public class RequestContentConverter {
 				.setParameters(parameters)
 				.setServletContext(servletContext)
 				.setRequestType(requestType)
+				.setContextPath(contextPath)
 				.build();
 	}
 
@@ -107,6 +109,14 @@ public class RequestContentConverter {
 	}
 
 	URI extractURI(List<String> content) {
+		//TODO it should work like in docs:
+		/**
+		Returns the part of this request's URL from the protocol name up to the query string in the first line of the HTTP request. The web container does not decode this String. For example:
+		First line of HTTP request	Returned Value
+		POST /some/path.html HTTP/1.1		/some/path.html
+		GET http://foo.bar/a.html HTTP/1.0		/a.html
+		HEAD /xyz?a=b HTTP/1.1		/xyz
+		 */
 		try {
 			String queryString = extractQueryString(content);
 			String[] queryStringParts = queryString.split("\\?");
@@ -129,6 +139,12 @@ public class RequestContentConverter {
 			logger.error(exception.getMessage());
 		}
 		return stringBUffer;
+	}
+	
+	String extractContextPath(List<String> content) {
+			String queryString = extractQueryString(content);
+			String[] queryStringParts = queryString.split("\\?");
+			return queryStringParts[0];
 	}
 
 	String extractQueryString(List<String> content) {

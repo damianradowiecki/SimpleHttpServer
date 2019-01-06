@@ -24,6 +24,7 @@ public class CookieService {
 		return CookieConverter
 				.convertToList(cookies)
 				.stream()
+				.filter(c -> c.getName() != null)
 				.filter(c -> c.getName().equalsIgnoreCase("JSESSIONID"))
 				.map(c -> c.getValue())
 				.findFirst();

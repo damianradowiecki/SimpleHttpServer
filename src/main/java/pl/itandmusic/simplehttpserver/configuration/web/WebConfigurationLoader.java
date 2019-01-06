@@ -191,7 +191,8 @@ public class WebConfigurationLoader {
 	}
 	
 	private static void setSessionConfiguration(ServletContext servletContext, WebApp webApp) {
-		if(webApp.getSessionConfig().getSessionTimeout() > 0) {
+		if(webApp.getSessionConfig() != null && 
+				webApp.getSessionConfig().getSessionTimeout() > 0) {
 			servletContext.getSessionManager().setSessionTimeout(webApp.getSessionConfig().getSessionTimeout());
 		}
 		else {

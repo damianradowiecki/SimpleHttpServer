@@ -38,12 +38,13 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	private Map<String, Object> attributes;
 	private ServletContext servletContext;
 	private RequestType requestType;
+	private String contextPath;
 	
 
 	private HttpServletRequestImpl(HttpMethod method, URI requestURI, String protocol, StringBuffer requestURL,
 			String queryString, Map<String, String> headers, Enumeration<String> headerNames, String remoteAddress,
 			ServletInputStream servletInputStream, Map<String, String> parameters, ServletContext servletContext, 
-			RequestType requestType) {
+			RequestType requestType, String contextPath) {
 		this.method = method;
 		this.requestURI = requestURI;
 		this.protocol = protocol;
@@ -56,6 +57,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		this.parameters = parameters;
 		this.servletContext = servletContext;
 		this.requestType = requestType;
+		this.contextPath = contextPath;
 	}
 	
 	public RequestType getRequestType() {
@@ -231,8 +233,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 	@Override
 	public String getContextPath() {
-		// TODO Auto-generated method stub
-		return null;
+		return contextPath;
 	}
 
 	@Override
@@ -402,6 +403,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 		private Map<String, String> parameters;
 		private ServletContext servletContext;
 		private RequestType requestType;
+		private String contextPath;
 
 		public static Builder newBuilder() {
 			return new Builder();
@@ -409,7 +411,8 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
 		public HttpServletRequestImpl build() {
 			return new HttpServletRequestImpl(method, requestURI, protocol, requestURL, queryString, headers,
-					headerNames, remoteAddress, servletInputStream, parameters, servletContext, requestType);
+					headerNames, remoteAddress, servletInputStream, parameters, servletContext, requestType, 
+					contextPath);
 		}
 
 		public Builder setHttpMethod(HttpMethod method) {
@@ -472,7 +475,10 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 			return this;
 		}
 		
-		
+		public Builder setContextPath(String contextPath) {
+			this.contextPath = contextPath;
+			return this;
+		}
 	}
 
 }
