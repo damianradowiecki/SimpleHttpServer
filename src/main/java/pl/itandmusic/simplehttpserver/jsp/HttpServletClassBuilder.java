@@ -43,10 +43,25 @@ public class HttpServletClassBuilder {
 		return this;
 	}
 	
+	public HttpServletClassBuilder addDoGetMethodDefinition() {
+		lines.add("protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {");
+		return this;
+	}
+	
+	public HttpServletClassBuilder addPrintWriterDeclaration() {
+		lines.add("PrintWriter out = response.getWriter();");
+		return this;
+	}
+	
 	public HttpServletClassBuilder addDoPostMethod(List<String> code) {
 		lines.add("protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {");
 		lines.addAll(code);
 		lines.add("}");
+		return this;
+	}
+	
+	public HttpServletClassBuilder addHTML(String html) {
+		lines.add(String.format("out.println(\"%s\")", html));
 		return this;
 	}
 	

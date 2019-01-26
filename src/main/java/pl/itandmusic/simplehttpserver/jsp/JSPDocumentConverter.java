@@ -1,10 +1,9 @@
 package pl.itandmusic.simplehttpserver.jsp;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.List;
 
 public interface JSPDocumentConverter {
 
-	String convert(File file) throws IOException;
+	List<String> convert(JSPDocument document);
 	
 }

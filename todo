@@ -1,4 +1,9 @@
 JSP handling
+1. Zalozenie jest takie zeby powstala klasa serwletu dfdsf.java
+2. Poczatek metody get zaczyna sie od PrintWriter out = response.getWriter();
+3. Dalej wczytywany jest plik JSP
+4. Kod html ladujemy do out.println("kod html")
+5. Kod Java bezposrednio do metod get
 
 java-nio-http-server analiza
 obsluga ByteBuffer request
